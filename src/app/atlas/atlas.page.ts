@@ -13,6 +13,7 @@ import { CityDetailComponent } from '../detail/city-detail.component';
 import { CityIndexComponent } from '../index/city-index.component';
 import { TunisiaMapComponent } from '../map/map.component';
 import { AtlasIntroComponent } from '../ui/atlas-intro.component';
+import { HannibalComponent } from '../ui/hannibal.component';
 import { PhotoGalleryComponent } from '../gallery/photo-gallery.component';
 import type { GalleryRequest } from '../gallery/photo-gallery.component';
 import { CITIES, REGIONS, type Region } from '../data/cities.data';
@@ -36,6 +37,7 @@ function formatDms(value: number, positive: string, negative: string): string {
     CityIndexComponent,
     CityDetailComponent,
     AtlasIntroComponent,
+    HannibalComponent,
     PhotoGalleryComponent,
   ],
   templateUrl: './atlas.page.html',

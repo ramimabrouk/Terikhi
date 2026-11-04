@@ -32,6 +32,7 @@
   </header>
 
   <main class="workspace" [attr.inert]="introOpen() ? '' : null">
+    <app-hannibal />
     <section class="map-pane" aria-label="Carte de Tunisie">
       <div class="map-rail">
         @if (selected(); as city) {
