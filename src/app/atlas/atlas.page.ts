@@ -13,6 +13,7 @@ import { CityDetailComponent } from '../detail/city-detail.component';
 import { CityIndexComponent } from '../index/city-index.component';
 import { TunisiaMapComponent } from '../map/map.component';
 import { AtlasIntroComponent } from '../ui/atlas-intro.component';
+import { HannibalCardComponent } from '../ui/hannibal-card.component';
 import { CITIES, REGIONS, type Region } from '../data/cities.data';
 
 const INTRO_KEY = 'tunisia-explorer:intro';
@@ -29,7 +30,13 @@ function formatDms(value: number, positive: string, negative: string): string {
 
 @Component({
   selector: 'app-atlas-page',
-  imports: [TunisiaMapComponent, CityIndexComponent, CityDetailComponent, AtlasIntroComponent],
+  imports: [
+    TunisiaMapComponent,
+    CityIndexComponent,
+    CityDetailComponent,
+    AtlasIntroComponent,
+    HannibalCardComponent,
+  ],
   templateUrl: './atlas.page.html',
   styleUrl: './atlas.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
