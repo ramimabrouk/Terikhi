@@ -13,6 +13,8 @@ import { CityDetailComponent } from '../detail/city-detail.component';
 import { CityIndexComponent } from '../index/city-index.component';
 import { TunisiaMapComponent } from '../map/map.component';
 import { AtlasIntroComponent } from '../ui/atlas-intro.component';
+import { PhotoGalleryComponent } from '../gallery/photo-gallery.component';
+import type { GalleryRequest } from '../gallery/photo-gallery.component';
 import { CITIES, REGIONS, type Region } from '../data/cities.data';
 
 const INTRO_KEY = 'tunisia-explorer:intro';
@@ -29,7 +31,13 @@ function formatDms(value: number, positive: string, negative: string): string {
 
 @Component({
   selector: 'app-atlas-page',
-  imports: [TunisiaMapComponent, CityIndexComponent, CityDetailComponent, AtlasIntroComponent],
+  imports: [
+    TunisiaMapComponent,
+    CityIndexComponent,
+    CityDetailComponent,
+    AtlasIntroComponent,
+    PhotoGalleryComponent,
+  ],
   templateUrl: './atlas.page.html',
   styleUrl: './atlas.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,11 +50,16 @@ export class AtlasPage {
 
   readonly introOpen = signal(false);
   readonly mapReveal = signal(false);
+  readonly galleryRequest = signal<GalleryRequest | null>(null);
 
   readonly selected = this.store.selected;
   readonly sheetOpen = this.store.sheetOpen;
   readonly regionFilter = this.store.regionFilter;
   readonly panelOpen = computed(() => this.selected() !== null || this.sheetOpen());
+  readonly activeGalleryRequest = computed(() => {
+    const request = this.galleryRequest();
+    return request && request.cityId === this.selected()?.id ? request : null;
+  });
 
   readonly regions: { region: Region; count: number }[] = REGIONS.map((region) => ({
     region,
@@ -93,6 +106,20 @@ export class AtlasPage {
 
   clearRegion(): void {
     this.store.clearRegion();
+  }
+
+  onCitySelected(id: string): void {
+    this.galleryRequest.set(null);
+    this.store.select(id);
+  }
+
+  onMapCleared(): void {
+    this.galleryRequest.set(null);
+    this.store.back();
+  }
+
+  closeGallery(): void {
+    this.galleryRequest.set(null);
   }
 
   private readIntroSeen(): boolean {

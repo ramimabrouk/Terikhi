@@ -1,0 +1,32 @@
+@if (request(); as gallery) {
+  <section class="gallery-panel" aria-label="Galerie de photos">
+    <header class="gallery-header">
+      <div>
+        <p class="eyebrow">{{ gallery.categoryLabel }} · {{ gallery.cityName }}</p>
+        <h2>{{ gallery.item.title }}</h2>
+      </div>
+      <button type="button" class="gallery-close" aria-label="Fermer la galerie" (click)="closed.emit()">
+        ×
+      </button>
+    </header>
+
+    <div class="gallery-view">
+      <img [src]="displayedImage()" [alt]="gallery.item.title + ' · ' + gallery.cityName" />
+      <span>{{ gallery.item.images.length }} photos</span>
+    </div>
+
+    <div class="gallery-thumbs" aria-label="Choisir une photo">
+      @for (image of gallery.item.images; track image) {
+        <button
+          type="button"
+          class="gallery-thumb"
+          [class.is-active]="displayedImage() === image"
+          [attr.aria-label]="'Afficher la photo ' + ($index + 1)"
+          (click)="selectImage(image)"
+        >
+          <img [src]="image" alt="" />
+        </button>
+      }
+    </div>
+  </section>
+}

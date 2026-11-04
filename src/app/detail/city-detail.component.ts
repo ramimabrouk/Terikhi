@@ -8,6 +8,7 @@ import {
   computed,
   inject,
   input,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -23,6 +24,8 @@ import {
   type SectionId,
   type TunisianCity,
 } from '../data/cities.data';
+import { CITY_GALLERY_BY_ID, type GalleryItem } from '../data/gallery.data';
+import type { GalleryCategory, GalleryRequest } from '../gallery/photo-gallery.component';
 
 @Component({
   selector: 'app-city-detail',
@@ -36,6 +39,7 @@ export class CityDetailComponent implements OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly city = input.required<TunisianCity>();
+  readonly photoRequested = output<GalleryRequest>();
 
   private readonly scrollRef = viewChild<ElementRef<HTMLElement>>('scroll');
   private readonly sectionPanelRef = viewChild<ElementRef<HTMLElement>>('sectionPanel');
@@ -68,6 +72,23 @@ export class CityDetailComponent implements OnDestroy {
   readonly scrollProgress = signal(0);
   readonly scrollable = signal(false);
   readonly heroScrolled = signal(false);
+
+  galleryItems(category: GalleryCategory): readonly GalleryItem[] {
+    const gallery = CITY_GALLERY_BY_ID.get(this.city().id);
+    return gallery?.[category] ?? [];
+  }
+
+  openGallery(category: GalleryCategory, item: GalleryItem): void {
+    const gallery = CITY_GALLERY_BY_ID.get(this.city().id);
+    if (!gallery) return;
+    this.photoRequested.emit({
+      cityId: this.city().id,
+      cityName: this.city().name,
+      category,
+      categoryLabel: category === 'places' ? 'À visiter' : 'Gastronomie',
+      item,
+    });
+  }
 
   private lastCityId = '';
   private lastSection: SectionId | null = null;

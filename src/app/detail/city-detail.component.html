@@ -139,6 +139,40 @@
                   }
                 </div>
               }
+              @case ('places') {
+                <ol class="entries entries--links">
+                  @for (item of galleryItems('places'); track item.title; let i = $index) {
+                    <li data-anim>
+                      <span class="entry-num">{{ pad(i + 1) }}</span>
+                      <button
+                        type="button"
+                        class="entry-link"
+                        (click)="openGallery('places', item)"
+                      >
+                        <span>{{ item.title }}</span>
+                        <span class="entry-arrow" aria-hidden="true">↗</span>
+                      </button>
+                    </li>
+                  }
+                </ol>
+              }
+              @case ('food') {
+                <ol class="entries entries--links entries--food">
+                  @for (item of galleryItems('food'); track item.title; let i = $index) {
+                    <li data-anim>
+                      <span class="entry-num">{{ pad(i + 1) }}</span>
+                      <button
+                        type="button"
+                        class="entry-link"
+                        (click)="openGallery('food', item)"
+                      >
+                        <span>{{ item.title }}</span>
+                        <span class="entry-arrow" aria-hidden="true">↗</span>
+                      </button>
+                    </li>
+                  }
+                </ol>
+              }
               @default {
                 <ol class="entries" [class.entries--food]="section.id === 'food'">
                   @for (item of section.highlights; track item.title; let i = $index) {
