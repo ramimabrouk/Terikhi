@@ -134,6 +134,7 @@
             @for (label of visibleLabels(); track label.id) {
               <text
                 class="map-label"
+                [class.map-label--fallback]="label.fallback"
                 [attr.x]="label.x"
                 [attr.y]="label.y"
                 dy="-0.32em"

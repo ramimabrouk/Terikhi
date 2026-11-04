@@ -30,6 +30,7 @@ interface MapLabel {
   x: number;
   y: number;
   name: string;
+  fallback: boolean;
 }
 
 interface MapCluster {
@@ -428,13 +429,29 @@ export class TunisiaMapComponent implements OnDestroy {
           x: anchor.x,
           y: anchor.y,
           name: shape.city.name.toUpperCase(),
+          fallback: false,
         });
         break;
       }
     }
 
+    const placedIds = new Set(labels.map((label) => label.id));
+    for (const shape of candidates) {
+      if (placedIds.has(shape.id)) continue;
+      labels.push({
+        id: shape.id,
+        x: shape.centroid[0],
+        y: shape.centroid[1],
+        name: shape.city.name.toUpperCase(),
+        fallback: true,
+      });
+    }
+
     const signature = labels
-      .map((label) => `${label.id}:${label.x.toFixed(1)}:${label.y.toFixed(1)}`)
+      .map(
+        (label) =>
+          `${label.id}:${label.x.toFixed(1)}:${label.y.toFixed(1)}:${label.fallback ? 'fallback' : 'placed'}`,
+      )
       .join('|');
     if (signature === this.labelSignature) return;
     this.labelSignature = signature;
@@ -489,7 +506,7 @@ export class TunisiaMapComponent implements OnDestroy {
     let changed = false;
 
     for (const label of labels) {
-      if (blocked.has(label.id)) continue;
+      if (blocked.has(label.id) || label.fallback) continue;
       const text = svg.querySelector<SVGTextElement>(
         `text.map-label[data-label-city="${label.id}"]`,
       );
