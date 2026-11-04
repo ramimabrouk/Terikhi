@@ -1,0 +1,173 @@
+<article class="detail" [attr.aria-labelledby]="'city-title'">
+  <div class="detail-toolbar">
+    <button type="button" class="back-btn" (click)="back()">
+      <svg viewBox="0 0 24 16" aria-hidden="true">
+        <path d="M23 8H2M9 1L2 8l7 7" fill="none" stroke="currentColor" stroke-width="1.1" />
+      </svg>
+      <span>Retour à la carte</span>
+    </button>
+    <div class="toolbar-end">
+      <span
+        class="scroll-hint"
+        aria-hidden="true"
+        [class.is-hidden]="!scrollable() || scrollProgress() > 0.04"
+      >
+        <span class="hint-label">Défiler</span><span>↓</span>
+      </span>
+      <span class="toolbar-meta">{{ city().name }} · {{ position().index }} / {{ position().total }}</span>
+    </div>
+    <span
+      class="toolbar-progress"
+      aria-hidden="true"
+      [class.is-visible]="scrollable()"
+      [style.transform]="'scaleX(' + scrollProgress() + ')'"
+    ></span>
+  </div>
+
+  @if (heroScrolled()) {
+    <div class="identity-bar">
+      <span class="identity-name">{{ city().name }}</span>
+      <span class="identity-region">{{ city().region }}</span>
+      <span class="identity-dot" aria-hidden="true">·</span>
+      <span class="identity-stat">{{ population() }} hab.</span>
+      <span class="identity-dot" aria-hidden="true">·</span>
+      <span class="identity-stat">{{ area() }} km²</span>
+    </div>
+  }
+
+  <div class="detail-scroll" #scroll>
+    <div class="detail-inner">
+      <header class="hero">
+        <p class="eyebrow" data-reveal>
+          Fiche {{ pad(position().index) }} / {{ pad(position().total) }} · Région {{ city().region }}
+        </p>
+
+        <div class="name-row">
+          <h2 id="city-title" class="city-name">
+            <span class="line-mask"><span class="line" data-reveal>{{ city().name }}</span></span>
+          </h2>
+          <p class="city-ar" lang="ar" dir="rtl" data-reveal>{{ city().nameAr }}</p>
+        </div>
+
+        <p class="tagline" data-reveal>{{ city().tagline }}</p>
+
+        <dl class="meta-strip" data-reveal>
+          <div>
+            <dt>Région</dt>
+            <dd>
+              {{ city().region }} <span class="meta-status">{{ statusLabel() }}</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Population</dt>
+            <dd>{{ population() }}</dd>
+          </div>
+          <div>
+            <dt>Superficie</dt>
+            <dd>{{ area() }} km²</dd>
+          </div>
+          @if (elevation(); as alt) {
+            <div>
+              <dt>Altitude</dt>
+              <dd>{{ alt }} m</dd>
+            </div>
+          }
+        </dl>
+
+        @if (!heroScrolled()) {
+          <p class="known-label eyebrow" data-reveal>Spécialités</p>
+          <ul class="known" aria-label="À voir et à goûter" data-reveal>
+            @for (tag of city().knownFor; track tag) {
+              <li>{{ tag }}</li>
+            }
+          </ul>
+        }
+      </header>
+
+      <div class="detail-body">
+        <nav class="section-index" aria-label="Rubriques de la fiche">
+          <p class="si-title eyebrow">Rubriques</p>
+          @for (section of city().sections; track section.id; let i = $index) {
+            <button
+              type="button"
+              class="si-btn"
+              [class.is-active]="section.id === sectionId()"
+              [attr.aria-current]="section.id === sectionId() ? 'true' : null"
+              (click)="selectSection(section.id)"
+            >
+              <span class="si-num">{{ pad(i + 1) }}</span>
+              <span class="si-label">{{ labels[section.id] }}</span>
+            </button>
+          }
+        </nav>
+
+        @if (currentSection(); as section) {
+          <div
+            class="section-panel"
+            #sectionPanel
+            role="region"
+            [attr.aria-label]="labels[section.id]"
+          >
+            <div class="section-head" data-anim>
+              <p class="eyebrow">Rubrique {{ sectionNumber() }}</p>
+              <h3>{{ labels[section.id] }}</h3>
+            </div>
+
+            <p class="section-body" data-anim>
+              {{ section.body }}
+            </p>
+
+            @switch (section.id) {
+              @case ('history') {
+                <ol class="timeline">
+                  @for (item of section.highlights; track item.title) {
+                    <li data-anim>
+                      <span class="tl-year">{{ item.title }}</span>
+                      <span class="tl-text">{{ item.description }}</span>
+                    </li>
+                  }
+                </ol>
+              }
+              @case ('origin') {
+                <div class="origin-notes">
+                  @for (item of section.highlights; track item.title) {
+                    <div class="origin-note" data-anim>
+                      <span class="origin-mark">Étymologie</span>
+                      <h4>{{ item.title }}</h4>
+                      <p>{{ item.description }}</p>
+                    </div>
+                  }
+                </div>
+              }
+              @default {
+                <ol class="entries" [class.entries--food]="section.id === 'food'">
+                  @for (item of section.highlights; track item.title; let i = $index) {
+                    <li data-anim>
+                      <span class="entry-num">{{ pad(i + 1) }}</span>
+                      <div class="entry-copy">
+                        <h4>{{ item.title }}</h4>
+                        <p>{{ item.description }}</p>
+                      </div>
+                    </li>
+                  }
+                </ol>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <footer class="detail-foot">
+    <button type="button" class="step" (click)="store.goPrevious()">
+      <span class="eyebrow">← Précédent</span>
+      <span class="step-name">{{ previous()?.name }}</span>
+    </button>
+    <span class="foot-count">{{ pad(position().index) }} / {{ pad(position().total) }}</span>
+    <button type="button" class="step step--next" (click)="store.goNext()">
+      <span class="eyebrow">Suivant →</span>
+      <span class="step-name">{{ next()?.name }}</span>
+    </button>
+  </footer>
+</article>

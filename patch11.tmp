@@ -1,0 +1,52 @@
+*** Begin Patch
+*** Update File: src/app/ui/atlas-intro.component.scss
+@@
+   .intro-foot {
+     flex-direction: column;
+     align-items: stretch;
+     gap: 20px;
+   }
+ 
+   .stats {
++    position: absolute;
++    top: 54%;
++    right: 18px;
++    left: 18px;
++    z-index: 3;
+     width: 100%;
+     gap: 10px;
+   }
+@@
+   .enter {
+     flex: 1;
++    min-height: 56px;
++    flex-shrink: 0;
+   }
+@@
+   .intro-top .eyebrow {
+     max-width: 42%;
+     line-height: 1.5;
+   }
++
++  .intro-meta {
++    flex-direction: column;
++    align-items: flex-start;
++    gap: 2px;
++  }
++
++  .intro-meta-dot {
++    display: none;
++  }
+ }
+ 
+ @media (max-width: 760px) and (max-height: 720px) {
+   .compass {
+     display: none;
+   }
++
++  .stats {
++    position: static;
++    width: 100%;
++  }
+ }
+*** End Patch

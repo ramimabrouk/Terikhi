@@ -1,0 +1,90 @@
+*** Begin Patch
+*** Update File: src/app/detail/city-detail.component.ts
+@@
+ import { AtlasStore } from '../core/atlas.store';
+ import { formatNumber, pad2 } from '../core/format';
+-import { GeometryService } from '../core/geometry.service';
+ import { MotionService } from '../core/motion.service';
+@@
+   readonly store = inject(AtlasStore);
+-  private readonly geometry = inject(GeometryService);
+   private readonly motion = inject(MotionService);
+@@
+   private readonly scrollRef = viewChild<ElementRef<HTMLElement>>('scroll');
+-  private readonly silhouetteRef = viewChild<ElementRef<HTMLElement>>('silhouette');
+   private readonly sectionPanelRef = viewChild<ElementRef<HTMLElement>>('sectionPanel');
+@@
+   readonly previous = this.store.previous;
+   readonly next = this.store.next;
+-  readonly shape = computed(() => this.geometry.shapeByCityId().get(this.city().id) ?? null);
+@@
+   readonly pad = pad2;
+   readonly scrollProgress = signal(0);
+   readonly scrollable = signal(false);
++  readonly heroScrolled = signal(false);
+@@
+   private entryCtx: gsap.Context | null = null;
+   private sectionCtx: gsap.Context | null = null;
+-  private ambientCtx: gsap.Context | null = null;
+   private lenis: Lenis | null = null;
+   private scrollEl: HTMLElement | null = null;
+-  private silhouetteFadeTo: gsap.QuickToFunc | null = null;
+@@
+     this.entryCtx?.revert();
+     this.sectionCtx?.revert();
+-    this.ambientCtx?.revert();
+-    this.silhouetteFadeTo?.tween.kill();
+     this.lenis?.destroy();
+@@
+-    const silhouette = this.silhouetteRef()?.nativeElement;
+-    if (!this.motion.reduced()) {
+-      if (silhouette) {
+-        this.silhouetteFadeTo = gsap.quickTo(silhouette, 'opacity', {
+-          duration: 0.35,
+-          ease: 'power2.out',
+-        });
+-      }
+-      this.ambientCtx = gsap.context(() => {
+-        gsap.to('.silhouette svg', {
+-          y: 8,
+-          x: -6,
+-          rotate: 0.8,
+-          duration: 20,
+-          repeat: -1,
+-          yoyo: true,
+-          ease: 'sine.inOut',
+-        });
+-      }, this.host.nativeElement);
+-    }
+-
+     scroll.addEventListener('scroll', this.onScroll, { passive: true });
+@@
+     const scroll = this.scrollEl;
+     if (!scroll) return;
+     this.updateScrollCue(scroll);
+-    const fade = Math.max(0, Math.min(1, 1 - scroll.scrollTop / 220));
+-    this.silhouetteFadeTo?.(fade);
+   };
+@@
+     const max = scroll.scrollHeight - scroll.clientHeight;
+     this.scrollable.set(max > 8);
+     this.scrollProgress.set(max > 0 ? Math.min(1, Math.max(0, scroll.scrollTop / max)) : 0);
++    this.heroScrolled.set(scroll.scrollTop > 140);
+@@
+       const items = root.querySelectorAll<HTMLElement>('[data-reveal]');
+-      const silhouette = this.silhouetteRef()?.nativeElement;
+ 
+       if (this.motion.reduced()) {
+         gsap.set(items, { clearProps: 'opacity,visibility,transform' });
+-        if (silhouette) gsap.set(silhouette, { clearProps: 'opacity,visibility' });
+         return;
+@@
+-      if (silhouette) {
+-        gsap.fromTo(
+-          silhouette,
+-          { autoAlpha: 0.35 },
+-          { autoAlpha: 1, duration: 1.1, ease: 'power2.out', clearProps: 'opacity,visibility' },
+-        );
+-      }
+     }, root);
+*** End Patch

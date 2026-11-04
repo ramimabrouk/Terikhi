@@ -1,0 +1,78 @@
+*** Begin Patch
+*** Update File: src/app/atlas/atlas.page.html
+@@
+               >
+-                Toutes
++                Toutes <span class="chip-caret" aria-hidden="true">›</span>
+               </button>
+*** Update File: src/app/atlas/atlas.page.scss
+@@
+ .vertical-word {
+@@
+-  font-size: clamp(56px, 5.6vw, 100px);
++  font-size: clamp(48px, 4.6vw, 84px);
+@@
+ .legend {
+-  display: grid;
+-  grid-template-columns: repeat(2, minmax(0, 1fr));
+-  gap: 6px;
++  display: flex;
++  flex-direction: column;
++  align-items: stretch;
++  gap: 0;
+ }
+@@
+ .legend-label {
+-  grid-column: 1 / -1;
+-  margin-bottom: 2px;
++  margin-bottom: 7px;
+ }
+ 
+ .chip {
+   display: inline-flex;
+   align-items: center;
+   gap: 7px;
++  width: 100%;
+   min-height: 44px;
+   padding: 0 9px;
+   border: 1px solid transparent;
++  border-bottom: 1px solid var(--line-soft);
+   border-radius: 2px;
+@@
+ .chip:hover {
+   border-color: var(--line);
+ }
+@@
+ .chip-count {
++  margin-left: auto;
+   font-size: 10px;
+   color: var(--ink-3);
+ }
++
++.chip-caret {
++  margin-left: auto;
++  color: var(--ink-3);
++  font-size: 14px;
++  line-height: 1;
++}
+@@
+   .legend {
+     display: flex;
++    flex-direction: row;
+     flex-wrap: nowrap;
+     gap: 2px;
+@@
+   .legend-label,
+-  .chip-count {
++  .chip-count,
++  .chip-caret {
+     display: none;
+   }
+ 
+   .chip {
+     flex: 0 0 auto;
++    width: auto;
+     padding: 0 9px;
++    border-bottom-color: transparent;
+   }
+*** End Patch

@@ -1,0 +1,29 @@
+*** Begin Patch
+*** Update File: src/app/index/city-index.component.scss
+@@
+ .index-cue {
+-  position: absolute;
+-  bottom: 10px;
+-  left: 50%;
+-  z-index: 3;
++  position: relative;
++  z-index: 3;
++  flex: 0 0 auto;
++  align-self: center;
++  margin: 6px auto 10px;
+   display: inline-flex;
+@@
+-  transform: translateX(-50%);
+   transition:
+@@
+ .group-head {
+   position: sticky;
+-  top: 0;
++  top: 6px;
+   z-index: 1;
+@@
+   background: var(--paper-soft);
+   border-bottom: 1px solid var(--line);
++  box-shadow: 0 -6px 0 var(--paper-soft);
+ }
+*** End Patch

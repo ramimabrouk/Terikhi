@@ -1,0 +1,52 @@
+*** Begin Patch
+*** Update File: src/app/map/map.component.ts
+@@
+   private layoutLabels(): void {
+@@
+   }
++
++  private measureLabelBoxes(
++    svg: SVGSVGElement,
++    shapes: readonly GovernorateShape[],
++  ): Map<string, { x: number; y: number; width: number; height: number }> {
++    const namespace = 'http://www.w3.org/2000/svg';
++    const group = document.createElementNS(namespace, 'g');
++    group.setAttribute('visibility', 'hidden');
++    group.setAttribute('pointer-events', 'none');
++    group.setAttribute('aria-hidden', 'true');
++    svg.appendChild(group);
++    const boxes = new Map<string, { x: number; y: number; width: number; height: number }>();
++
++    for (const shape of shapes) {
++      const text = document.createElementNS(namespace, 'text');
++      text.setAttribute('class', 'map-label');
++      text.setAttribute('x', '0');
++      text.setAttribute('y', '0');
++      text.setAttribute('dy', '-0.32em');
++      text.setAttribute('text-anchor', 'middle');
++      text.textContent = shape.city.name.toUpperCase();
++      group.appendChild(text);
++      const box = text.getBBox();
++      boxes.set(shape.id, {
++        x: box.x,
++        y: box.y,
++        width: box.width,
++        height: box.height,
++      });
++    }
++
++    group.remove();
++    return boxes;
++  }
+@@
+     const fonts = host.ownerDocument.fonts;
+     if (fonts) {
+-      void fonts.ready.then(() => this.zone.run(() => this.validateRenderedLabels()));
++      void fonts.ready.then(() =>
++        this.zone.run(() => {
++          this.layoutLabels();
++          this.validateRenderedLabels();
++        }),
++      );
+     }
+*** End Patch

@@ -1,0 +1,109 @@
+<div class="index">
+  <header class="index-head">
+    <p class="eyebrow">Index général</p>
+    <div class="title-row">
+      <h2>Les gouvernorats</h2>
+      <span class="result-count">{{ filteredCities().length }} / 24</span>
+    </div>
+
+    <div class="search" role="search">
+      <svg class="search-icon" viewBox="0 0 20 20" aria-hidden="true">
+        <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1" />
+        <path d="M13 13l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1" />
+      </svg>
+      <input
+        #searchInput
+        type="search"
+        class="search-input"
+        [value]="query()"
+        (input)="onQuery($event)"
+        placeholder="Nom, région, spécialité…"
+        aria-label="Rechercher un gouvernorat"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      @if (query()) {
+        <button
+          type="button"
+          class="search-clear"
+          (click)="clearQuery()"
+          aria-label="Effacer la recherche"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1" />
+          </svg>
+        </button>
+      }
+    </div>
+
+    @if (regionFilter(); as region) {
+      <div class="active-filter">
+        <span class="eyebrow">Filtre de région</span>
+        <button
+          type="button"
+          class="filter-clear"
+          (click)="store.clearRegion()"
+          [attr.aria-label]="'Retirer le filtre de région ' + region"
+        >
+          {{ region }} <span aria-hidden="true">×</span>
+        </button>
+      </div>
+    }
+  </header>
+
+  <div class="index-scroll" #indexScroll>
+    @if (groups().length === 0) {
+      <div class="empty">
+        <p class="eyebrow">Aucun résultat</p>
+        <h3>Aucun gouvernorat ne correspond à cette recherche.</h3>
+        <p>Essayez un autre nom, une région ou une spécialité locale.</p>
+        <button type="button" class="reset-link" (click)="clearQuery()">Réinitialiser la recherche</button>
+      </div>
+    } @else {
+      @for (group of groups(); track group.region) {
+        <section class="group" [attr.aria-labelledby]="'group-' + group.region">
+          <div class="group-head">
+            <h3 [id]="'group-' + group.region">{{ group.region }}</h3>
+            <span>{{ group.cities.length }} gouvernorats</span>
+          </div>
+          <ul>
+            @for (city of group.cities; track city.id) {
+              <li>
+                <button
+                  type="button"
+                  class="city-row"
+                  [class.is-last-viewed]="city.id === store.lastViewedId()"
+                  [attr.data-city]="city.id"
+                  (click)="open(city)"
+                >
+                  <span class="row-num">{{ number(city) }}</span>
+                  <span class="row-main">
+                    <span class="row-name">{{ city.name }}</span>
+                    <span class="row-ar" lang="ar" dir="rtl">{{ city.nameAr }}</span>
+                    @if (city.isCapital) {
+                      <span class="row-capital">Capitale</span>
+                    }
+                    @if (city.id === store.lastViewedId()) {
+                      <span class="row-seen">Dernière fiche</span>
+                    }
+                  </span>
+                  <span class="row-meta">{{ city.knownFor[0] }}</span>
+                  <span class="row-arrow" aria-hidden="true">→</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      <p class="index-note">
+        Chaque fiche réunit quatre rubriques : histoire, origine du nom, lieux à visiter et
+        gastronomie.
+      </p>
+    }
+  </div>
+
+  <p class="index-cue" [class.is-hidden]="!showScrollCue()" aria-hidden="true">
+    Défiler <span>↓</span>
+  </p>
+</div>

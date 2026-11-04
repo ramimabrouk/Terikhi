@@ -1,0 +1,73 @@
+*** Begin Patch
+*** Update File: src/app/map/map.component.ts
+@@
+ interface MapLabel {
+   id: string;
+   x: number;
+   y: number;
+   name: string;
+ }
++
++interface MapCluster {
++  id: string;
++  x: number;
++  y: number;
++  targetX: number;
++  targetY: number;
++  anchor: 'start' | 'end';
++  label: string;
++  leader: string;
++}
+@@
+-  readonly grandTunis = computed(() => {
+-    const capital = this.capital();
+-    if (!capital) return null;
+-    const width = this.viewBoxRect().width;
+-    const label = 'GRAND TUNIS';
+-    let x = capital.centroid[0] + 42;
+-    let y = Math.max(20, capital.centroid[1] - 20);
+-    let anchor: 'start' | 'end' = 'start';
+-    if (x + 76 > width - 8) {
+-      x = Math.max(8, capital.centroid[0] - 42);
+-      anchor = 'end';
+-    }
+-    const targetX = anchor === 'start' ? x - 4 : x + 4;
+-    return {
+-      x,
+-      y,
+-      anchor,
+-      label,
+-      leader: `M${capital.centroid[0]},${capital.centroid[1]} L${targetX},${y + 4}`,
+-    };
+-  });
++  readonly clusters = computed<MapCluster[]>(() => {
++    const width = this.viewBoxRect().width;
++    const items: MapCluster[] = [];
++    const add = (
++      id: string,
++      label: string,
++      targetId: string,
++      offsetY: number,
++    ): void => {
++      const shape = this.shapeByCityId().get(targetId);
++      if (!shape) return;
++      const [targetX, targetY] = shape.centroid;
++      const x = width - 20;
++      const y = Math.max(18, Math.min(this.viewBoxRect().height - 18, targetY + offsetY));
++      items.push({
++        id,
++        x,
++        y,
++        targetX,
++        targetY,
++        anchor: 'end',
++        label,
++        leader: `M${targetX},${targetY} L${x + 4},${y + 4}`,
++      });
++    };
++    add('grand-tunis', 'GRAND TUNIS', 'tunis', -18);
++    add('cap-bon', 'CAP BON', 'nabeul', 8);
++    add('sahel', 'SAHEL', 'sousse', 14);
++    return items;
++  });
+*** End Patch

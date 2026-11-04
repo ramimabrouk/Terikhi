@@ -1,0 +1,24 @@
+*** Begin Patch
+*** Update File: src/app/detail/city-detail.component.scss
+@@
+ .known li {
+@@
+   text-transform: uppercase;
+   color: var(--ink-2);
+-  white-space: nowrap;
+ }
+@@
+   .known {
+-    flex-wrap: nowrap;
++    flex-wrap: wrap;
+     gap: 6px 14px;
+     margin-top: 2px;
+-    overflow-x: auto;
+-    padding-bottom: 2px;
+-    scrollbar-width: none;
+-  }
+-
+-  .known::-webkit-scrollbar {
+-    display: none;
+   }
+*** End Patch

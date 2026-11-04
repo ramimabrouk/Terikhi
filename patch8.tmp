@@ -1,0 +1,109 @@
+*** Begin Patch
+*** Update File: src/app/detail/city-detail.component.scss
+@@
+ .detail-foot {
+@@
+   background: var(--paper-soft);
+ }
++
++.identity-bar {
++  max-width: 100%;
++}
+@@
+   .toolbar-meta {
+     font-size: 10px;
+   }
+ 
+-  .scroll-hint .hint-label {
+-    display: none;
++  .scroll-hint {
++    display: none;
+   }
+ 
+   .hero {
+-    padding: 26px 20px 32px;
+-  }
+-
+-  .silhouette {
+-    display: none;
++    padding: 16px 20px 18px;
+   }
+ 
+   .city-name {
+-    font-size: clamp(44px, 12vw, 66px);
++    font-size: clamp(38px, 10.5vw, 54px);
+   }
+ 
+   .city-ar {
+-    font-size: 28px;
++    font-size: 24px;
+   }
+ 
+   .tagline {
+-    font-size: 18px;
++    margin-top: 10px;
++    font-size: 16px;
++  }
++
++  .meta-strip {
++    margin-top: 14px;
++  }
++
++  .meta-strip > div {
++    padding: 8px 14px;
++  }
++
++  .meta-strip > div:first-child {
++    padding-left: 0;
++  }
++
++  .meta-strip > div:last-child {
++    padding-right: 0;
++  }
++
++  .badges {
++    margin-top: 8px;
++  }
++
++  .known-label {
++    margin-top: 12px;
++  }
++
++  .known {
++    flex-wrap: nowrap;
++    gap: 6px 14px;
++    margin-top: 4px;
++    overflow-x: auto;
++    padding-bottom: 2px;
++    scrollbar-width: none;
++  }
++
++  .known::-webkit-scrollbar {
++    display: none;
+   }
+ 
+   .detail-body {
+     display: block;
+-    padding: 0 20px 34px;
++    padding: 0 20px 30px;
+@@
+   .detail-foot {
++    grid-template-columns: 1fr 1fr;
++    gap: 12px;
+     padding: 12px 20px;
+   }
+@@
+   .foot-count {
+     display: none;
+   }
++
++  .identity-bar {
++    gap: 6px;
++    padding: 6px 20px;
++  }
++
++  .identity-name {
++    font-size: 18px;
++  }
+ }
+*** End Patch

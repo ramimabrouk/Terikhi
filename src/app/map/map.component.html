@@ -1,0 +1,185 @@
+<div class="map" [class.is-ready]="status() === 'ready'">
+  @switch (status()) {
+    @case ('ready') {
+      <svg
+        #svg
+        class="map-svg"
+        [class.has-selection]="selectedId() !== null"
+        [class.is-compact]="compact()"
+        [attr.viewBox]="viewBox()"
+        preserveAspectRatio="xMidYMid meet"
+        role="group"
+        aria-label="Carte interactive des 24 gouvernorats de Tunisie"
+      >
+        <defs>
+          <linearGradient id="waterGradient" x1="0" y1="0" x2="0.18" y2="1">
+            <stop offset="0" stop-color="#9db6b1" />
+            <stop offset="1" stop-color="#8fa8a5" />
+          </linearGradient>
+          <pattern id="waterLines" width="18" height="11" patternUnits="userSpaceOnUse">
+            <path
+              d="M0 5.5 Q4.5 4 9 5.5 T18 5.5"
+              fill="none"
+              stroke="#f7f1e6"
+              stroke-opacity="0.13"
+              stroke-width="0.65"
+            />
+          </pattern>
+        </defs>
+
+        <rect
+          class="map-field"
+          [attr.x]="viewBoxRect().x"
+          [attr.y]="viewBoxRect().y"
+          [attr.width]="viewBoxRect().width"
+          [attr.height]="viewBoxRect().height"
+          fill="url(#waterGradient)"
+          (click)="onBackdrop()"
+        />
+        <rect
+          class="water-texture"
+          [attr.x]="viewBoxRect().x"
+          [attr.y]="viewBoxRect().y"
+          [attr.width]="viewBoxRect().width"
+          [attr.height]="viewBoxRect().height"
+          fill="url(#waterLines)"
+          pointer-events="none"
+        />
+
+        <g #world class="map-world" transform="translate(0 0) scale(1)">
+          @for (shape of shapes(); track shape.id) {
+            <path
+              class="gov"
+              [class.region-nord]="shape.city.region === 'Nord'"
+              [class.region-centre]="shape.city.region === 'Centre'"
+              [class.region-sud]="shape.city.region === 'Sud'"
+              [class.is-selected]="selectedId() === shape.id"
+              [class.is-hovered]="hoveredId() === shape.id"
+              [class.is-muted]="isMuted(shape)"
+              [attr.d]="shape.d"
+              [attr.data-city]="shape.id"
+              [attr.aria-label]="ariaLabel(shape)"
+              [attr.aria-current]="selectedId() === shape.id ? 'true' : null"
+              [attr.tabindex]="0"
+              role="button"
+              vector-effect="non-scaling-stroke"
+              (click)="onSelect(shape)"
+              (keydown)="onPathKey($event, shape)"
+              (pointerenter)="showTip(shape, $event)"
+              (pointermove)="moveTip(shape, $event)"
+              (pointerleave)="clearTip()"
+              (focus)="showFocusTip(shape, $event)"
+              (blur)="onBlur()"
+            />
+          }
+
+          @if (selectedShape(); as selected) {
+            <path
+              class="selected-shape"
+              [attr.d]="selected.d"
+              vector-effect="non-scaling-stroke"
+              aria-hidden="true"
+            />
+          }
+
+          @if (focusShape(); as focused) {
+            <g class="focus-ring" aria-hidden="true">
+              <path
+                class="focus-ring-halo"
+                [attr.d]="focused.d"
+                vector-effect="non-scaling-stroke"
+              />
+              <path
+                class="focus-ring-line"
+                [attr.d]="focused.d"
+                vector-effect="non-scaling-stroke"
+              />
+            </g>
+          }
+
+          @if (capital(); as cap) {
+            <g
+              class="capital-marker"
+              aria-hidden="true"
+              [attr.transform]="'translate(' + cap.centroid[0] + ' ' + cap.centroid[1] + ')'"
+            >
+              <circle class="capital-halo" r="12" />
+              <path
+                class="capital-star"
+                d="M0,-5.4 L1.5,-1.7 L5.4,-1.3 L2.5,1.1 L3.3,5 L0,2.9 L-3.3,5 L-2.5,1.1 L-5.4,-1.3 L-1.5,-1.7 Z"
+              />
+            </g>
+          }
+
+          @for (cluster of clusters(); track cluster.id) {
+            <g class="cluster-label" aria-hidden="true">
+              <path class="cluster-leader" [attr.d]="cluster.leader" vector-effect="non-scaling-stroke" />
+              <circle
+                class="cluster-dot"
+                [attr.cx]="cluster.targetX"
+                [attr.cy]="cluster.targetY"
+                r="2"
+              />
+              <text
+                class="cluster-text"
+                [attr.x]="cluster.x"
+                [attr.y]="cluster.y"
+                [attr.text-anchor]="cluster.anchor"
+                >{{ cluster.label }}</text
+              >
+            </g>
+          }
+
+          <g class="map-labels" aria-hidden="true">
+            @for (label of visibleLabels(); track label.id) {
+              <text
+                class="map-label"
+                [attr.x]="label.x"
+                [attr.y]="label.y"
+                dy="-0.32em"
+                [attr.data-label-city]="label.id"
+                [textContent]="label.name"
+              ></text>
+            }
+          </g>
+        </g>
+      </svg>
+
+      <div class="geo-labels" aria-hidden="true">
+        <span class="geo-label geo-label--sea">Mer Méditerranée</span>
+        <span class="geo-label geo-label--west">Algérie</span>
+        <span class="geo-label geo-label--east">Libye</span>
+      </div>
+
+      @if (!selectedId()) {
+        @if (tip(); as t) {
+          @if (tipShape(); as shape) {
+            <div class="map-tip" aria-hidden="true" [style.left.px]="t.x" [style.top.px]="t.y">
+              <span class="tip-region">
+                {{ shape.city.region }} · {{ shape.city.coastal ? 'Littoral' : 'Intérieur' }}
+              </span>
+              <span class="tip-name">{{ shape.city.name }}</span>
+              <span class="tip-ar" lang="ar" dir="rtl">{{ shape.city.nameAr }}</span>
+              <span class="tip-cta">Ouvrir la fiche</span>
+            </div>
+          }
+        }
+      }
+    }
+    @case ('error') {
+      <div class="map-state" role="alert">
+        <p class="eyebrow">Carte indisponible</p>
+        <p class="state-title">Le fond de carte n'a pas pu être chargé.</p>
+        <p class="state-copy">Vérifiez votre connexion, puis relancez le tracé.</p>
+        <button class="state-action" type="button" (click)="retry()">Réessayer</button>
+      </div>
+    }
+    @default {
+      <div class="map-state" aria-live="polite">
+        <p class="eyebrow">Chargement</p>
+        <p class="state-title">Tracé des vingt-quatre gouvernorats</p>
+        <div class="state-line" aria-hidden="true"><span></span></div>
+      </div>
+    }
+  }
+</div>

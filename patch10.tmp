@@ -1,0 +1,84 @@
+*** Begin Patch
+*** Update File: src/app/ui/atlas-intro.component.scss
+@@
+ .skip {
+   display: inline-flex;
+   align-items: center;
+   min-height: 44px;
+-  padding: 0 14px;
+-  border: 1px solid var(--line);
++  padding: 0 4px;
++  border: 0;
+   font-family: var(--font-mono);
+   font-size: 10px;
+   letter-spacing: 0.1em;
+   text-transform: uppercase;
+   color: var(--ink-2);
++  text-decoration: underline;
++  text-decoration-thickness: 1px;
++  text-underline-offset: 5px;
+   transition:
+-    color 0.22s var(--ease-out),
+-    border-color 0.22s var(--ease-out),
+-    background 0.22s var(--ease-out);
++    color 0.22s var(--ease-out),
++    text-decoration-color 0.22s var(--ease-out);
+ }
+ 
+ .skip:hover {
+-  border-color: var(--terracotta);
+-  background: rgba(173, 76, 42, 0.06);
+   color: var(--terracotta);
+ }
+@@
+ .intro-center {
+   position: relative;
+   z-index: 2;
+   align-self: center;
+-  padding-left: clamp(0px, 3vw, 54px);
++  padding-left: 0;
+@@
+-.intro-rule {
+-  width: 116px;
+-  height: 1px;
+-  margin-bottom: 22px;
+-  background: var(--ink);
+-  transform-origin: left center;
+-  animation: intro-rule 1s 0.1s var(--ease-inout) both;
+-}
+-
+ .intro-kicker {
+-  margin-bottom: 16px;
++  margin-bottom: 18px;
+@@
+ .intro-title {
+@@
+ }
++
++.intro-meta {
++  display: inline-flex;
++  flex-wrap: wrap;
++  align-items: center;
++  gap: 0 7px;
++  max-width: 60%;
++}
++
++.intro-meta > span {
++  white-space: nowrap;
++}
+@@
+ .compass text {
+   font-family: var(--font-mono);
+-  font-size: 12px;
++  font-size: 14px;
+@@
+-@keyframes intro-rule {
+-  from {
+-    transform: scaleX(0);
+-  }
+-  to {
+-    transform: scaleX(1);
+-  }
+-}
+-
+*** End Patch

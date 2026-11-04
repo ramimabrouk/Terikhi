@@ -1,0 +1,40 @@
+*** Begin Patch
+*** Update File: src/app/ui/atlas-intro.component.html
+@@
+   <header class="intro-top">
+-    <p class="eyebrow">Atlas de Tunisie · Planches I–XXIV</p>
++    <p class="eyebrow intro-meta">
++      <span>Atlas de Tunisie</span><span class="intro-meta-dot" aria-hidden="true">·</span
++      ><span>Planches I–XXIV</span>
++    </p>
+     <button type="button" class="skip" (click)="dismiss()">Passer l'introduction</button>
+   </header>
+ 
+   <div class="intro-center">
+-    <div class="intro-rule" aria-hidden="true"></div>
+     <p class="eyebrow intro-kicker">Vingt-quatre gouvernorats · quatre rubriques</p>
+@@
+   <svg class="compass" viewBox="0 0 400 400" aria-hidden="true">
+     <g class="rose-ticks">
+-      <circle cx="200" cy="200" r="192" />
++      <circle cx="200" cy="200" r="184" />
+       <circle cx="200" cy="200" r="156" />
+       <circle cx="200" cy="200" r="66" />
+       <path d="M200 8v18M200 374v18M8 200h18M374 200h18" />
+@@
+     <path class="needle" d="M200 68L212 192 200 206 188 192Z" />
+     <path class="needle-soft" d="M200 332L212 208 200 194 188 208Z" />
+-    <text x="200" y="34" text-anchor="middle">N</text>
+-    <text x="200" y="378" text-anchor="middle">S</text>
+-    <text x="16" y="205" text-anchor="middle">O</text>
+-    <text x="384" y="205" text-anchor="middle">E</text>
++    <text x="200" y="32" text-anchor="middle">N</text>
++    <text x="200" y="376" text-anchor="middle">S</text>
++    <text x="30" y="205" text-anchor="middle">O</text>
++    <text x="370" y="205" text-anchor="middle">E</text>
+@@
+       <button type="button" class="enter" (click)="dismiss()">
+@@
+-      <span class="coord">36°48′ N · 10°10′ E</span>
++      <span class="coord">36°48′ N · 10°11′ E</span>
+*** End Patch

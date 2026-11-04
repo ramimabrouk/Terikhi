@@ -1,0 +1,356 @@
+:host {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.map-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map-field {
+  cursor: default;
+}
+
+.water-texture {
+  pointer-events: none;
+}
+
+.gov {
+  stroke: var(--coast);
+  stroke-width: 0.65;
+  cursor: pointer;
+  transition:
+    fill 0.35s var(--ease-out),
+    opacity 0.45s var(--ease-out);
+}
+
+.region-nord {
+  fill: var(--map-nord);
+}
+
+.region-centre {
+  fill: var(--map-centre);
+}
+
+.region-sud {
+  fill: var(--map-sud);
+}
+
+.gov:hover,
+.gov.is-hovered {
+  fill: #c69c70;
+}
+
+.gov.is-selected {
+  fill: var(--terracotta);
+  stroke: none;
+}
+
+.gov.is-muted {
+  opacity: 0.24;
+  filter: saturate(0.45);
+}
+
+.gov:focus,
+.gov:focus-visible {
+  outline: none;
+}
+
+.selected-shape {
+  fill: var(--terracotta);
+  stroke: var(--terracotta-deep);
+  stroke-width: 0.9;
+  pointer-events: none;
+}
+
+.focus-ring-halo,
+.focus-ring-line {
+  fill: none;
+  pointer-events: none;
+}
+
+.focus-ring-halo {
+  stroke: var(--paper);
+  stroke-width: 5.5;
+}
+
+.focus-ring-line {
+  stroke: var(--indigo);
+  stroke-width: 2;
+}
+
+.map-svg:not(.is-revealed) .gov {
+  opacity: 0;
+}
+
+.map-svg:not(.is-revealed) .map-label,
+.map-svg:not(.is-revealed) .capital-marker {
+  opacity: 0;
+}
+
+.map-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  fill: var(--ink-2);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out) 0.55s;
+}
+
+.map-svg.is-revealed .map-label {
+  opacity: 0.82;
+}
+
+.map-svg.has-selection .map-label {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+.capital-marker {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out) 0.9s;
+}
+
+.map-svg.is-revealed .capital-marker {
+  opacity: 1;
+}
+
+.map-svg.has-selection .capital-marker {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+.cluster-label {
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out) 0.9s;
+}
+
+.map-svg.is-revealed .cluster-label {
+  opacity: 1;
+}
+
+.map-svg.has-selection .cluster-label {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+.cluster-leader {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 0.7;
+}
+
+.cluster-dot {
+  fill: var(--terracotta);
+}
+
+.cluster-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.capital-halo {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 0.6;
+  opacity: 0.45;
+}
+
+.capital-star {
+  fill: var(--ink);
+}
+
+.geo-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.geo-label {
+  position: absolute;
+  writing-mode: vertical-rl;
+}
+
+.geo-label--sea {
+  top: 20%;
+  right: 10px;
+  color: var(--indigo);
+  letter-spacing: 0.32em;
+}
+
+.geo-label--west {
+  bottom: 24%;
+  left: 6px;
+}
+
+.geo-label--east {
+  bottom: 14%;
+  right: 10px;
+}
+
+.map-tip {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 196px;
+  padding: 12px 14px 11px;
+  background: var(--paper-soft);
+  border: 1px solid var(--ink);
+  box-shadow: 4px 4px 0 rgba(34, 29, 23, 0.1);
+  pointer-events: none;
+}
+
+.tip-region {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.tip-name {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.tip-ar {
+  font-family: var(--font-arabic);
+  font-size: 17px;
+  color: var(--terracotta);
+  line-height: 1.2;
+}
+
+.tip-cta {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+}
+
+.map-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+}
+
+.state-title {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.state-copy {
+  max-width: 30ch;
+  color: var(--ink-3);
+  font-size: 15px;
+}
+
+.state-action {
+  min-height: 44px;
+  margin-top: 12px;
+  padding: 0 20px;
+  border: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    background 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+.state-action:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.state-line {
+  width: 180px;
+  height: 1px;
+  margin-top: 12px;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.state-line span {
+  display: block;
+  width: 38%;
+  height: 100%;
+  background: var(--terracotta);
+  animation: map-scan 1.5s var(--ease-inout) infinite;
+}
+
+@keyframes map-scan {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(370%);
+  }
+}
+
+@media (max-width: 1200px) {
+  .geo-labels {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .map-tip {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .map-svg.is-compact .map-label {
+    opacity: 0;
+    transition-delay: 0s;
+  }
+}
