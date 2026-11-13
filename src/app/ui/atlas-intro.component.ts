@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { MotionService } from '../core/motion.service';
+import { LanguageService } from '../core/language.service';
 
 @Component({
   selector: 'app-atlas-intro',
@@ -18,6 +19,7 @@ import { MotionService } from '../core/motion.service';
 export class AtlasIntroComponent implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly motion = inject(MotionService);
+  readonly i18n = inject(LanguageService);
 
   readonly exitStarted = output<void>();
   readonly closed = output<void>();

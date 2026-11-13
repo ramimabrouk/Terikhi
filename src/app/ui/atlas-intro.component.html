@@ -3,18 +3,18 @@
   [class.is-leaving]="leaving()"
   role="dialog"
   aria-modal="false"
-  aria-label="Introduction à l'atlas de Tunisie"
+  [attr.aria-label]="i18n.t('atlasIntro')"
 >
   <header class="intro-top">
     <p class="eyebrow intro-meta">
       <span>Atlas de Tunisie</span><span class="intro-meta-dot" aria-hidden="true">·</span
       ><span>Planches I–XXIV</span>
     </p>
-    <button type="button" class="skip" (click)="dismiss()">Passer l'introduction</button>
+    <button type="button" class="skip" (click)="dismiss()">{{ i18n.t('skipIntro') }}</button>
   </header>
 
   <div class="intro-center">
-    <p class="eyebrow intro-kicker">Vingt-quatre gouvernorats · quatre rubriques</p>
+    <p class="eyebrow intro-kicker">{{ i18n.t('twentyFourGovernorates') }} · {{ i18n.t('fourSections') }}</p>
     <h2 class="intro-title">
       <span class="mask"><span class="t-line">Tunisie</span></span>
       <span class="mask mask--it"><span class="t-line t-line--it">un atlas</span></span>
@@ -46,21 +46,21 @@
     <div class="stats">
       <div class="stat">
         <span class="stat-num">24</span>
-        <span class="stat-label">gouvernorats</span>
+        <span class="stat-label">{{ i18n.t('governorates') }}</span>
       </div>
       <div class="stat">
         <span class="stat-num">03</span>
-        <span class="stat-label">régions</span>
+        <span class="stat-label">{{ i18n.t('regions') }}</span>
       </div>
       <div class="stat">
         <span class="stat-num">04</span>
-        <span class="stat-label">rubriques</span>
+        <span class="stat-label">{{ i18n.t('sections') }}</span>
       </div>
     </div>
 
     <div class="enter-wrap">
       <button type="button" class="enter" (click)="dismiss()">
-        <span>Ouvrir l'atlas</span>
+        <span>{{ i18n.t('openAtlas') }}</span>
         <span class="enter-arrow" aria-hidden="true">→</span>
       </button>
       <span class="coord">36°48′ N · 10°11′ E</span>

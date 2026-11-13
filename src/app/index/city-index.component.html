@@ -1,8 +1,8 @@
 <div class="index">
   <header class="index-head">
-    <p class="eyebrow">Index général</p>
+    <p class="eyebrow">{{ i18n.t('generalIndex') }}</p>
     <div class="title-row">
-      <h2>Les gouvernorats</h2>
+      <h2>{{ i18n.t('governorateIndex') }}</h2>
       <span class="result-count">{{ filteredCities().length }} / 24</span>
     </div>
 
@@ -17,8 +17,8 @@
         class="search-input"
         [value]="query()"
         (input)="onQuery($event)"
-        placeholder="Nom, région, spécialité…"
-        aria-label="Rechercher un gouvernorat"
+        [placeholder]="i18n.t('searchPlaceholder')"
+        [attr.aria-label]="i18n.t('search')"
         autocomplete="off"
         spellcheck="false"
       />
@@ -36,14 +36,26 @@
       }
     </div>
 
+    @if (popular().length > 0 && !query()) {
+      <div class="popular">
+        <span class="eyebrow">🔥 {{ i18n.t('popular') }}</span>
+        @for (item of popular(); track item.id) {
+          <button type="button" class="popular-chip" (click)="store.select(item.id)">
+            <span>{{ item.icon }}</span> {{ i18n.isArabic() ? item.nameAr : item.name }}
+            <small>{{ item.views }}</small>
+          </button>
+        }
+      </div>
+    }
+
     @if (regionFilter(); as region) {
       <div class="active-filter">
-        <span class="eyebrow">Filtre de région</span>
+        <span class="eyebrow">{{ i18n.t('regionFilter') }}</span>
         <button
           type="button"
           class="filter-clear"
           (click)="store.clearRegion()"
-          [attr.aria-label]="'Retirer le filtre de région ' + region"
+          [attr.aria-label]="i18n.t('removeRegionFilter') + ' ' + region"
         >
           {{ region }} <span aria-hidden="true">×</span>
         </button>
@@ -54,17 +66,17 @@
   <div class="index-scroll" #indexScroll>
     @if (groups().length === 0) {
       <div class="empty">
-        <p class="eyebrow">Aucun résultat</p>
-        <h3>Aucun gouvernorat ne correspond à cette recherche.</h3>
-        <p>Essayez un autre nom, une région ou une spécialité locale.</p>
-        <button type="button" class="reset-link" (click)="clearQuery()">Réinitialiser la recherche</button>
+        <p class="eyebrow">{{ i18n.t('noResults') }}</p>
+        <h3>{{ i18n.t('noMatch') }}</h3>
+        <p>{{ i18n.t('tryAnother') }}</p>
+        <button type="button" class="reset-link" (click)="clearQuery()">{{ i18n.t('resetSearch') }}</button>
       </div>
     } @else {
       @for (group of groups(); track group.region) {
         <section class="group" [attr.aria-labelledby]="'group-' + group.region">
           <div class="group-head">
-            <h3 [id]="'group-' + group.region">{{ group.region }}</h3>
-            <span>{{ group.cities.length }} gouvernorats</span>
+            <h3 [id]="'group-' + group.region">{{ regionLabel(group.region) }}</h3>
+            <span>{{ group.cities.length }} {{ i18n.t('governorates') }}</span>
           </div>
           <ul>
             @for (city of group.cities; track city.id) {
@@ -81,10 +93,10 @@
                     <span class="row-name">{{ city.name }}</span>
                     <span class="row-ar" lang="ar" dir="rtl">{{ city.nameAr }}</span>
                     @if (city.isCapital) {
-                      <span class="row-capital">Capitale</span>
+                      <span class="row-capital">{{ i18n.t('capital') }}</span>
                     }
                     @if (city.id === store.lastViewedId()) {
-                      <span class="row-seen">Dernière fiche</span>
+                      <span class="row-seen">{{ i18n.t('lastViewed') }}</span>
                     }
                   </span>
                   <span class="row-meta">{{ city.knownFor[0] }}</span>
@@ -97,8 +109,7 @@
       }
 
       <p class="index-note">
-        Chaque fiche réunit quatre rubriques : histoire, origine du nom, lieux à visiter et
-        gastronomie.
+        {{ i18n.t('foodAndPlaces') }}
       </p>
     }
   </div>

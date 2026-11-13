@@ -359,3 +359,115 @@
     transition-delay: 0s;
   }
 }
+
+/* ---------- living sea ---------- */
+.sea .wave {
+  fill: none;
+  stroke: #f7f1e6;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-opacity: 0.32;
+}
+
+.wave-row {
+  animation: swell-drift 7s linear infinite;
+}
+
+.wave-row .wave {
+  animation: swell-bob 3.6s ease-in-out infinite alternate;
+}
+
+.wave-row--back {
+  animation-direction: reverse;
+}
+
+.wave-row--back .wave {
+  stroke-opacity: 0.18;
+  animation-delay: -1.8s;
+}
+
+@keyframes swell-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(64px);
+  }
+}
+
+@keyframes swell-bob {
+  from {
+    translate: 0 -2.5px;
+  }
+  to {
+    translate: 0 2.5px;
+  }
+}
+
+.sea .glint {
+  stroke: #fffaf0;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0;
+  animation: glint 4.2s ease-in-out infinite;
+}
+
+@keyframes glint {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+  }
+  80% {
+    opacity: 0.75;
+  }
+}
+
+.foam path {
+  fill: none;
+  stroke: #fffaf0;
+  stroke-width: 7;
+  stroke-linejoin: round;
+  stroke-opacity: 0.35;
+  animation: foam 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes foam {
+  from {
+    stroke-width: 3;
+    stroke-opacity: 0.55;
+  }
+  to {
+    stroke-width: 10;
+    stroke-opacity: 0.12;
+  }
+}
+
+.map-svg.has-selection .sea,
+.map-svg.has-selection .foam {
+  opacity: 0.55;
+}
+
+.tip-emblem {
+  display: inline-block;
+  margin-inline-start: 6px;
+  font-size: 0.85em;
+  animation: emblem-wiggle 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes emblem-wiggle {
+  from {
+    transform: rotate(-8deg) scale(1);
+  }
+  to {
+    transform: rotate(8deg) scale(1.15);
+  }
+}
+
+.foam {
+  transition: opacity 1.4s ease;
+}
+
+.map-svg:not(.is-revealed) .foam {
+  opacity: 0;
+}

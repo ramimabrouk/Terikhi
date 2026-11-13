@@ -17,7 +17,10 @@ import { gsap } from 'gsap';
 import type { GovernorateShape } from '../core/geometry.service';
 import { GeometryService } from '../core/geometry.service';
 import { MotionService } from '../core/motion.service';
+import { LanguageService } from '../core/language.service';
 import type { Region } from '../data/cities.data';
+import { REGION_EMBLEMS } from '../data/emblems.data';
+import { InteractionService } from '../core/interaction.service';
 
 interface TooltipState {
   id: string;
@@ -59,6 +62,7 @@ interface ZoomTarget {
 export class TunisiaMapComponent implements OnDestroy {
   readonly geometry = inject(GeometryService);
   private readonly motion = inject(MotionService);
+  readonly i18n = inject(LanguageService);
   private readonly zone = inject(NgZone);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly svgRef = viewChild<ElementRef<SVGSVGElement>>('svg');
@@ -78,6 +82,42 @@ export class TunisiaMapComponent implements OnDestroy {
   readonly viewBoxRect = this.geometry.viewBoxRect;
   readonly shapeByCityId = this.geometry.shapeByCityId;
   readonly viewportReady = this.geometry.viewportReady;
+
+  private readonly interaction = inject(InteractionService);
+
+  /** Rows of animated swell drawn across the sea, regenerated on resize. */
+  readonly waveRows = computed(() => {
+    const { width, height } = this.viewBoxRect();
+    const rows: { y: number; d: string; speed: number; back: boolean }[] = [];
+    const wavelength = 64;
+    let index = 0;
+    for (let y = 18; y < height; y += 34) {
+      const amplitude = 2.2 + (index % 3) * 0.8;
+      let d = `M${-wavelength * 2} 0`;
+      for (let x = -wavelength * 2; x < width + wavelength * 2; x += wavelength) {
+        d += ` q${wavelength / 4} ${-amplitude} ${wavelength / 2} 0 t${wavelength / 2} 0`;
+      }
+      rows.push({ y, d, speed: 6 + (index % 4) * 1.7, back: index % 2 === 1 });
+      index += 1;
+    }
+    return rows;
+  });
+
+  readonly glints = computed(() => {
+    const { width, height } = this.viewBoxRect();
+    const items: { x: number; y: number; w: number; delay: number }[] = [];
+    let seed = 7;
+    const rand = (): number => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+    for (let i = 0; i < 26; i += 1) {
+      items.push({ x: rand() * width, y: rand() * height, w: 6 + rand() * 12, delay: rand() * 4 });
+    }
+    return items;
+  });
+
+  readonly coastalShapes = computed(() => this.shapes().filter((shape) => shape.city.coastal));
 
   readonly hoveredId = signal<string | null>(null);
   readonly tip = signal<TooltipState | null>(null);
@@ -182,8 +222,12 @@ export class TunisiaMapComponent implements OnDestroy {
   }
 
   ariaLabel(shape: GovernorateShape): string {
-    const capital = shape.city.isCapital ? ' Capitale de la Tunisie.' : '';
-    return `${shape.city.name}, gouvernorat de la région ${shape.city.region}.${capital} Ouvrir la fiche.`;
+    const capital = shape.city.isCapital ? ` ${this.i18n.t('capital')}.` : '';
+    const name = this.i18n.isArabic() ? shape.city.nameAr : shape.city.name;
+    const region = this.i18n.t(
+      shape.city.region === 'Nord' ? 'north' : shape.city.region === 'Centre' ? 'centre' : 'south',
+    );
+    return `${name}، ${this.i18n.t('governorates')} ${region}.${capital} ${this.i18n.t('openAtlas')}.`;
   }
 
   onSelect(shape: GovernorateShape): void {
@@ -198,9 +242,14 @@ export class TunisiaMapComponent implements OnDestroy {
     this.onSelect(shape);
   }
 
+  emblem(id: string): string | null {
+    return REGION_EMBLEMS[id]?.icon ?? null;
+  }
+
   showTip(shape: GovernorateShape, event: PointerEvent): void {
     if (this.selectedId() || event.pointerType === 'touch') return;
     this.hoveredId.set(shape.id);
+    this.interaction.react('curious', 900);
     this.placeTip(shape.id, event.clientX, event.clientY);
   }
 

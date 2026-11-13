@@ -14,7 +14,10 @@ import { gsap } from 'gsap';
 import { pad2 } from '../core/format';
 import { AtlasStore } from '../core/atlas.store';
 import { MotionService } from '../core/motion.service';
-import { CITIES, REGIONS, type TunisianCity } from '../data/cities.data';
+import { LanguageService } from '../core/language.service';
+import { CITIES, CITY_BY_ID, REGIONS, type TunisianCity } from '../data/cities.data';
+import { REGION_EMBLEMS } from '../data/emblems.data';
+import { ApiService } from '../core/api.service';
 
 @Component({
   selector: 'app-city-index',
@@ -24,6 +27,7 @@ import { CITIES, REGIONS, type TunisianCity } from '../data/cities.data';
 })
 export class CityIndexComponent implements OnDestroy {
   readonly store = inject(AtlasStore);
+  readonly i18n = inject(LanguageService);
   private readonly motion = inject(MotionService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
@@ -34,6 +38,14 @@ export class CityIndexComponent implements OnDestroy {
   readonly query = this.store.query;
   readonly regionFilter = this.store.regionFilter;
   readonly showScrollCue = signal(true);
+  private readonly api = inject(ApiService);
+  readonly popular = signal<{ id: string; name: string; nameAr: string; icon: string; views: number }[]>([]);
+
+  regionLabel(region: (typeof REGIONS)[number]): string {
+    return this.i18n.t(
+      region === 'Nord' ? 'north' : region === 'Centre' ? 'centre' : 'south',
+    );
+  }
 
   readonly groups = computed(() => {
     const cities = this.filteredCities();
@@ -48,6 +60,24 @@ export class CityIndexComponent implements OnDestroy {
   private scrollEl: HTMLElement | null = null;
 
   constructor() {
+    void this.api.popular(3).then((top) =>
+      this.popular.set(
+        top
+          .map((entry) => {
+            const city = CITY_BY_ID.get(entry.cityId);
+            return city
+              ? {
+                  id: city.id,
+                  name: city.name,
+                  nameAr: city.nameAr,
+                  icon: REGION_EMBLEMS[city.id]?.icon ?? '•',
+                  views: entry.views,
+                }
+              : null;
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null),
+      ),
+    );
     afterRenderEffect(() => {
       if (this.store.searchFocusTick() === 0) return;
       this.searchInput()?.nativeElement.focus({ preventScroll: true });

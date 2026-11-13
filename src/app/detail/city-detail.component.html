@@ -1,10 +1,10 @@
-<article class="detail" [attr.aria-labelledby]="'city-title'">
+<article class="detail" [attr.aria-labelledby]="'city-title'" [attr.dir]="i18n.isArabic() ? 'rtl' : 'ltr'">
   <div class="detail-toolbar">
     <button type="button" class="back-btn" (click)="back()">
       <svg viewBox="0 0 24 16" aria-hidden="true">
         <path d="M23 8H2M9 1L2 8l7 7" fill="none" stroke="currentColor" stroke-width="1.1" />
       </svg>
-      <span>Retour à la carte</span>
+      <span>{{ i18n.t('backToMap') }}</span>
     </button>
     <div class="toolbar-end">
       <span
@@ -12,9 +12,9 @@
         aria-hidden="true"
         [class.is-hidden]="!scrollable() || scrollProgress() > 0.04"
       >
-        <span class="hint-label">Défiler</span><span>↓</span>
+        <span class="hint-label">{{ i18n.t('scroll') }}</span><span>↓</span>
       </span>
-      <span class="toolbar-meta">{{ city().name }} · {{ position().index }} / {{ position().total }}</span>
+      <span class="toolbar-meta">{{ cityName() }} · {{ position().index }} / {{ position().total }}</span>
     </div>
     <span
       class="toolbar-progress"
@@ -26,12 +26,12 @@
 
   @if (heroScrolled()) {
     <div class="identity-bar">
-      <span class="identity-name">{{ city().name }}</span>
-      <span class="identity-region">{{ city().region }}</span>
+      <span class="identity-name">{{ cityName() }}</span>
+      <span class="identity-region">{{ regionLabel(city().region) }}</span>
       <span class="identity-dot" aria-hidden="true">·</span>
-      <span class="identity-stat">{{ population() }} hab.</span>
+      <span class="identity-stat">{{ population() }} {{ i18n.t('inhabitants') }}</span>
       <span class="identity-dot" aria-hidden="true">·</span>
-      <span class="identity-stat">{{ area() }} km²</span>
+      <span class="identity-stat">{{ area() }} {{ i18n.t('squareKilometers') }}</span>
     </div>
   }
 
@@ -39,45 +39,45 @@
     <div class="detail-inner">
       <header class="hero">
         <p class="eyebrow" data-reveal>
-          Fiche {{ pad(position().index) }} / {{ pad(position().total) }} · Région {{ city().region }}
+          {{ i18n.t('sheet') }} {{ pad(position().index) }} / {{ pad(position().total) }} · {{ i18n.t('region') }} {{ regionLabel(city().region) }}
         </p>
 
         <div class="name-row">
           <h2 id="city-title" class="city-name">
-            <span class="line-mask"><span class="line" data-reveal>{{ city().name }}</span></span>
+            <span class="line-mask"><span class="line" data-reveal>{{ cityName() }}</span></span>
           </h2>
           <p class="city-ar" lang="ar" dir="rtl" data-reveal>{{ city().nameAr }}</p>
         </div>
 
-        <p class="tagline" data-reveal>{{ city().tagline }}</p>
+        <p class="tagline" data-reveal>{{ translateText(city().tagline, city().taglineAr) }}</p>
 
         <dl class="meta-strip" data-reveal>
           <div>
-            <dt>Région</dt>
+            <dt>{{ i18n.t('region') }}</dt>
             <dd>
-              {{ city().region }} <span class="meta-status">{{ statusLabel() }}</span>
+              {{ regionLabel(city().region) }} <span class="meta-status">{{ statusLabel() }}</span>
             </dd>
           </div>
           <div>
-            <dt>Population</dt>
-            <dd>{{ population() }}</dd>
+            <dt>{{ i18n.t('population') }}</dt>
+            <dd>{{ population() }} {{ i18n.t('inhabitants') }}</dd>
           </div>
           <div>
-            <dt>Superficie</dt>
-            <dd>{{ area() }} km²</dd>
+            <dt>{{ i18n.t('area') }}</dt>
+            <dd>{{ area() }} {{ i18n.t('squareKilometers') }}</dd>
           </div>
           @if (elevation(); as alt) {
             <div>
-              <dt>Altitude</dt>
+              <dt>{{ i18n.t('altitude') }}</dt>
               <dd>{{ alt }} m</dd>
             </div>
           }
         </dl>
 
         @if (!heroScrolled()) {
-          <p class="known-label eyebrow" data-reveal>Spécialités</p>
-          <ul class="known" aria-label="À voir et à goûter" data-reveal>
-            @for (tag of city().knownFor; track tag) {
+          <p class="known-label eyebrow" data-reveal>{{ i18n.t('specialties') }}</p>
+          <ul class="known" [attr.aria-label]="i18n.t('foodAndPlaces')" data-reveal>
+            @for (tag of translateArray(city().knownFor, city().knownForAr); track tag) {
               <li>{{ tag }}</li>
             }
           </ul>
@@ -85,8 +85,8 @@
       </header>
 
       <div class="detail-body">
-        <nav class="section-index" aria-label="Rubriques de la fiche">
-          <p class="si-title eyebrow">Rubriques</p>
+        <nav class="section-index" [attr.aria-label]="i18n.t('sections')">
+          <p class="si-title eyebrow">{{ i18n.t('sections') }}</p>
           @for (section of city().sections; track section.id; let i = $index) {
             <button
               type="button"
@@ -96,7 +96,7 @@
               (click)="selectSection(section.id)"
             >
               <span class="si-num">{{ pad(i + 1) }}</span>
-              <span class="si-label">{{ labels[section.id] }}</span>
+              <span class="si-label">{{ label(section.id) }}</span>
             </button>
           }
         </nav>
@@ -106,15 +106,28 @@
             class="section-panel"
             #sectionPanel
             role="region"
-            [attr.aria-label]="labels[section.id]"
+            [attr.aria-label]="label(section.id)"
           >
             <div class="section-head" data-anim>
-              <p class="eyebrow">Rubrique {{ sectionNumber() }}</p>
-              <h3>{{ labels[section.id] }}</h3>
+              <p class="eyebrow">{{ i18n.t('rubric') }} {{ sectionNumber() }}</p>
+              <h3>{{ label(section.id) }}</h3>
+              <button
+                type="button"
+                class="copy-btn"
+                data-narrate="off"
+                [attr.aria-label]="i18n.t('copy')"
+                (click)="copySection(section)"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <rect x="6.5" y="3" width="10" height="12" rx="1.5" />
+                  <path d="M4 6.5v9.5a1.5 1.5 0 0 0 1.5 1.5H13" />
+                </svg>
+                <span>{{ i18n.t('copy') }}</span>
+              </button>
             </div>
 
             <p class="section-body" data-anim>
-              {{ section.body }}
+              {{ translateText(section.body, section.bodyAr) }}
             </p>
 
             @switch (section.id) {
@@ -123,7 +136,7 @@
                   @for (item of section.highlights; track item.title) {
                     <li data-anim>
                       <span class="tl-year">{{ item.title }}</span>
-                      <span class="tl-text">{{ item.description }}</span>
+                      <span class="tl-text">{{ translateText(item.description, item.descriptionAr) }}</span>
                     </li>
                   }
                 </ol>
@@ -132,9 +145,9 @@
                 <div class="origin-notes">
                   @for (item of section.highlights; track item.title) {
                     <div class="origin-note" data-anim>
-                      <span class="origin-mark">Étymologie</span>
-                      <h4>{{ item.title }}</h4>
-                      <p>{{ item.description }}</p>
+                      <span class="origin-mark">{{ i18n.t('etymology') }}</span>
+                      <h4>{{ translateText(item.title, item.titleAr) }}</h4>
+                      <p>{{ translateText(item.description, item.descriptionAr) }}</p>
                     </div>
                   }
                 </div>
@@ -179,8 +192,8 @@
                     <li data-anim>
                       <span class="entry-num">{{ pad(i + 1) }}</span>
                       <div class="entry-copy">
-                        <h4>{{ item.title }}</h4>
-                        <p>{{ item.description }}</p>
+                        <h4>{{ translateText(item.title, item.titleAr) }}</h4>
+                        <p>{{ translateText(item.description, item.descriptionAr) }}</p>
                       </div>
                     </li>
                   }
@@ -195,13 +208,13 @@
 
   <footer class="detail-foot">
     <button type="button" class="step" (click)="store.goPrevious()">
-      <span class="eyebrow">← Précédent</span>
-      <span class="step-name">{{ previous()?.name }}</span>
+      <span class="eyebrow">← {{ i18n.t('previous') }}</span>
+      <span class="step-name">{{ previous() ? translateText(previous()!.name, previous()!.nameAr) : '' }}</span>
     </button>
     <span class="foot-count">{{ pad(position().index) }} / {{ pad(position().total) }}</span>
     <button type="button" class="step step--next" (click)="store.goNext()">
-      <span class="eyebrow">Suivant →</span>
-      <span class="step-name">{{ next()?.name }}</span>
+      <span class="eyebrow">{{ i18n.t('next') }} →</span>
+      <span class="step-name">{{ next() ? translateText(next()!.name, next()!.nameAr) : '' }}</span>
     </button>
   </footer>
 </article>

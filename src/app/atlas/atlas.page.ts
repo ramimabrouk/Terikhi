@@ -4,16 +4,26 @@ import {
   DOCUMENT,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { AtlasStore } from '../core/atlas.store';
 import { GeometryService } from '../core/geometry.service';
+import { LanguageService } from '../core/language.service';
 import { CityDetailComponent } from '../detail/city-detail.component';
 import { CityIndexComponent } from '../index/city-index.component';
 import { TunisiaMapComponent } from '../map/map.component';
 import { AtlasIntroComponent } from '../ui/atlas-intro.component';
-import { HannibalComponent } from '../ui/hannibal.component';
+import { ElissaComponent } from '../ui/elissa.component';
+import { EagleCursorComponent } from '../ui/eagle-cursor.component';
+import { FxLayerComponent } from '../ui/fx-layer.component';
+import { NarrationControlComponent } from '../ui/narration-control.component';
+import { RegionEmblemComponent } from '../map/region-emblem.component';
+import { MapPuzzleComponent } from '../puzzle/map-puzzle.component';
+import { NarrationDirectorService } from '../core/narration-director.service';
+import { ApiService } from '../core/api.service';
 import { PhotoGalleryComponent } from '../gallery/photo-gallery.component';
 import type { GalleryRequest } from '../gallery/photo-gallery.component';
 import { CITIES, REGIONS, type Region } from '../data/cities.data';
@@ -37,7 +47,12 @@ function formatDms(value: number, positive: string, negative: string): string {
     CityIndexComponent,
     CityDetailComponent,
     AtlasIntroComponent,
-    HannibalComponent,
+    ElissaComponent,
+    EagleCursorComponent,
+    FxLayerComponent,
+    NarrationControlComponent,
+    RegionEmblemComponent,
+    MapPuzzleComponent,
     PhotoGalleryComponent,
   ],
   templateUrl: './atlas.page.html',
@@ -47,10 +62,13 @@ function formatDms(value: number, positive: string, negative: string): string {
 export class AtlasPage {
   readonly store = inject(AtlasStore);
   readonly geometry = inject(GeometryService);
+  readonly i18n = inject(LanguageService);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
 
+  private readonly api = inject(ApiService);
   readonly introOpen = signal(false);
+  readonly puzzleOpen = signal(false);
   readonly mapReveal = signal(false);
   readonly galleryRequest = signal<GalleryRequest | null>(null);
 
@@ -77,10 +95,17 @@ export class AtlasPage {
   });
 
   constructor() {
+    let lastViewed: string | null = null;
+    effect(() => {
+      const id = this.store.selectedId();
+      if (id && id !== lastViewed) untracked(() => this.api.recordView(id));
+      lastViewed = id;
+    });
     const seen = this.readIntroSeen();
     this.introOpen.set(!seen);
     this.mapReveal.set(seen);
     void this.geometry.load();
+    inject(NarrationDirectorService).start(this.destroyRef);
     this.document.addEventListener('keydown', this.onKeydown);
     this.destroyRef.onDestroy(() => this.document.removeEventListener('keydown', this.onKeydown));
   }
@@ -110,9 +135,23 @@ export class AtlasPage {
     this.store.clearRegion();
   }
 
+  regionLabel(region: Region): string {
+    return this.i18n.t(
+      region === 'Nord' ? 'north' : region === 'Centre' ? 'centre' : 'south',
+    );
+  }
+
   onCitySelected(id: string): void {
     this.galleryRequest.set(null);
     this.store.select(id);
+  }
+
+  openPuzzle(): void {
+    this.puzzleOpen.set(true);
+  }
+
+  closePuzzle(): void {
+    this.puzzleOpen.set(false);
   }
 
   onMapCleared(): void {
@@ -141,7 +180,7 @@ export class AtlasPage {
   }
 
   private readonly onKeydown = (event: KeyboardEvent): void => {
-    if (this.introOpen()) return;
+    if (this.introOpen() || this.puzzleOpen()) return;
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey) return;
 
     const target = event.target;

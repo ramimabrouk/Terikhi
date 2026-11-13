@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { LanguageService } from './language.service';
 import {
   CITIES,
   CITY_BY_ID,
@@ -31,6 +32,7 @@ export function citySearchText(city: TunisianCity): string {
 
 @Injectable({ providedIn: 'root' })
 export class AtlasStore {
+  private readonly i18n = inject(LanguageService);
   readonly selectedId = signal<string | null>(null);
   readonly lastViewedId = signal<string | null>(null);
   readonly selected = computed<TunisianCity | null>(() => {
@@ -94,8 +96,20 @@ export class AtlasStore {
 
   readonly liveMessage = computed(() => {
     const city = this.selected();
-    if (!city) return 'Carte de Tunisie : 24 gouvernorats.';
-    return `${city.name}, région ${city.region}. Rubrique ${SECTION_LABELS[this.sectionId()]}.`;
+    if (!city) return `${this.i18n.t('atlasIntro')} : 24 ${this.i18n.t('governorates')}.`;
+    const name = this.i18n.isArabic() ? city.nameAr : city.name;
+    const region = this.i18n.t(
+      city.region === 'Nord' ? 'north' : city.region === 'Centre' ? 'centre' : 'south',
+    );
+    return `${name}، ${this.i18n.t('region')} ${region}. ${this.i18n.t('rubric')} ${this.i18n.t(
+      this.sectionId() === 'history'
+        ? 'history'
+        : this.sectionId() === 'origin'
+          ? 'origin'
+          : this.sectionId() === 'places'
+            ? 'places'
+            : 'food',
+    )}.`;
   });
 
   select(id: string): void {

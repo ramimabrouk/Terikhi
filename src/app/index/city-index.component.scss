@@ -396,3 +396,36 @@
     display: none;
   }
 }
+
+.popular {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 14px;
+}
+
+.popular-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 14px;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.popular-chip small {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--ink-3);
+}
+
+.popular-chip:hover {
+  border-color: var(--terracotta);
+  transform: translateY(-2px);
+}

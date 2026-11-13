@@ -1,0 +1,176 @@
+<div
+  class="puzzle"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="puzzle-title"
+  [attr.dir]="i18n.isArabic() ? 'rtl' : 'ltr'"
+  [class.is-done]="done()"
+>
+  <header class="bar">
+    <div class="title">
+      <p class="eyebrow">{{ i18n.t('puzzle') }} · 24 {{ i18n.t('governorates') }}</p>
+      <h2 id="puzzle-title">{{ i18n.t('puzzleTitle') }}</h2>
+    </div>
+
+    <div class="modes" role="group" [attr.aria-label]="i18n.t('puzzle')">
+      <button type="button" [class.is-active]="mode() === 'easy'" (click)="setMode('easy')">
+        {{ i18n.t('easy') }}
+      </button>
+      <button type="button" [class.is-active]="mode() === 'expert'" (click)="setMode('expert')">
+        {{ i18n.t('expert') }}
+      </button>
+    </div>
+
+    <dl class="stats">
+      <div>
+        <dt>{{ i18n.t('time') }}</dt>
+        <dd>{{ time() }}</dd>
+      </div>
+      <div>
+        <dt>{{ i18n.t('moves') }}</dt>
+        <dd>{{ moves() }}</dd>
+      </div>
+      <div>
+        <dt>{{ i18n.t('placed') }}</dt>
+        <dd>{{ placedCount() }}/{{ total() }}</dd>
+      </div>
+    </dl>
+
+    <div class="actions">
+      <button type="button" class="ghost" (click)="hint()" [disabled]="done()">
+        💡 {{ i18n.t('hint') }}
+      </button>
+      <button type="button" class="ghost" (click)="shuffle()">⟲ {{ i18n.t('shuffle') }}</button>
+      <button type="button" class="close" (click)="close()" [attr.aria-label]="i18n.t('close')">×</button>
+    </div>
+
+    <span class="progress" aria-hidden="true" [style.transform]="'scaleX(' + progress() + ')'"></span>
+  </header>
+
+  <p class="intro">{{ i18n.t('puzzleIntro') }}</p>
+
+  <div class="stage">
+    <svg
+      #board
+      class="board"
+      [class.is-expert]="mode() === 'expert'"
+      [attr.viewBox]="'0 0 ' + width + ' ' + height"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <pattern id="pz-waves" width="40" height="16" patternUnits="userSpaceOnUse">
+          <animateTransform attributeName="patternTransform" type="translate" from="0 0" to="40 0" dur="6s" repeatCount="indefinite" />
+          <path d="M0 8 Q10 4 20 8 T40 8" fill="none" stroke="#f7f1e6" stroke-opacity="0.22" stroke-width="1" />
+        </pattern>
+      </defs>
+      <rect class="sea" [attr.width]="width" [attr.height]="height" />
+      <rect [attr.width]="width" [attr.height]="height" fill="url(#pz-waves)" />
+      <rect class="tray" x="8" y="8" width="352" [attr.height]="height - 16" rx="6" />
+      <rect class="tray" x="640" y="8" width="352" [attr.height]="height - 16" rx="6" />
+
+      <g class="slots" aria-hidden="true">
+        @for (target of targets(); track target.id) {
+          <path class="slot" [attr.d]="target.d" />
+        }
+        @if (hintTarget(); as h) {
+          <path class="slot-hint" [attr.d]="h.d" />
+        }
+      </g>
+
+      <g class="pieces">
+        @for (piece of renderOrder(); track piece.id) {
+          <g
+            class="piece"
+            [class.is-placed]="piece.placed"
+            [class.is-active]="activeId() === piece.id"
+            [class.is-hint]="hintId() === piece.id"
+            [class.just-placed]="lastPlacedId() === piece.id"
+            [class.region-nord]="piece.region === 'Nord'"
+            [class.region-centre]="piece.region === 'Centre'"
+            [class.region-sud]="piece.region === 'Sud'"
+            [attr.transform]="pieceTransform(piece)"
+            [style.--wave-delay]="waveDelay(piece) + 'ms'"
+            (pointerdown)="onPointerDown($event, piece)"
+            [attr.aria-label]="i18n.isArabic() ? piece.nameAr : piece.name"
+          >
+            <path class="piece-hit" [attr.d]="piece.d" />
+            <path class="piece-shape" [attr.d]="piece.d" />
+            @if (mode() === 'easy' && !piece.placed) {
+              <text class="piece-label" [attr.x]="piece.cx" [attr.y]="piece.cy">
+                {{ i18n.isArabic() ? piece.nameAr : piece.name }}
+              </text>
+            }
+          </g>
+        }
+      </g>
+
+      @if (done()) {
+        <g class="flag" transform="translate(500 330) scale(0.72)" aria-hidden="true">
+          <circle class="flag-burst" r="120" />
+          <g class="flag-body">
+            <rect x="-90" y="-60" width="180" height="120" rx="3" fill="#e70013" />
+            <circle r="30" fill="#fff" />
+            <circle cx="5" r="22" fill="#e70013" />
+            <circle cx="11" r="17.6" fill="#fff" />
+            <path
+              transform="translate(6 0) rotate(-18)"
+              fill="#e70013"
+              d="M0 -12 L3.5 -3.7 L11.4 -3.7 L5 1.4 L7.1 9.7 L0 4.6 L-7.1 9.7 L-5 1.4 L-11.4 -3.7 L-3.5 -3.7 Z"
+            />
+          </g>
+        </g>
+      }
+    </svg>
+
+    @if (done()) {
+      <aside class="result" aria-live="polite">
+        <p class="eyebrow">{{ i18n.t('puzzleDone') }}</p>
+        <h3>{{ i18n.t('bravo') }}</h3>
+        <dl class="result-stats">
+          <div>
+            <dt>{{ i18n.t('time') }}</dt>
+            <dd>{{ time() }}</dd>
+          </div>
+          <div>
+            <dt>{{ i18n.t('moves') }}</dt>
+            <dd>{{ moves() }}</dd>
+          </div>
+        </dl>
+        @if (!saved()) {
+          <form class="save" (submit)="$event.preventDefault(); saveScore()">
+            <input
+              type="text"
+              maxlength="24"
+              [value]="playerName()"
+              (input)="setName($event)"
+              [placeholder]="i18n.t('yourName')"
+              [attr.aria-label]="i18n.t('yourName')"
+            />
+            <button type="submit">{{ i18n.t('saveScore') }}</button>
+          </form>
+        }
+        <div class="board-scores">
+          <p class="eyebrow">
+            {{ i18n.t('leaderboard') }} · {{ mode() === 'easy' ? i18n.t('easy') : i18n.t('expert') }}
+            @if (online() === false) {
+              <span class="offline">· {{ i18n.t('offline') }}</span>
+            }
+          </p>
+          <ol>
+            @for (score of scores(); track $index) {
+              <li>
+                <span class="rank">{{ $index + 1 }}</span>
+                <span class="who">{{ score.name }}</span>
+                <span class="t">{{ formatTime(score.timeMs) }}</span>
+                <span class="m">{{ score.moves }} {{ i18n.t('moves') }}</span>
+              </li>
+            } @empty {
+              <li class="empty">—</li>
+            }
+          </ol>
+        </div>
+        <button type="button" class="again" (click)="shuffle()">{{ i18n.t('playAgain') }} →</button>
+      </aside>
+    }
+  </div>
+</div>

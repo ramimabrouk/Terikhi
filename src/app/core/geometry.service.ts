@@ -30,6 +30,15 @@ export interface GovernorateShape {
   labelAnchors: readonly LabelAnchor[];
 }
 
+export interface PuzzleShape {
+  id: string;
+  city: TunisianCity;
+  d: string;
+  centroid: [number, number];
+  bounds: [[number, number], [number, number]];
+  area: number;
+}
+
 interface GovernorateProperties {
   shapeName: string;
 }
@@ -138,6 +147,42 @@ export class GeometryService {
     if (this.rawFeatures.length > 0) {
       this.applyProjection();
     }
+  }
+
+  /**
+   * Project the governorates into an arbitrary board (used by the puzzle),
+   * fitting Tunisia inside the given extent.
+   */
+  projectInto(extent: [[number, number], [number, number]]): PuzzleShape[] {
+    if (this.rawFeatures.length === 0) return [];
+    const collection: FeatureCollection<Geometry, GovernorateProperties> = {
+      type: 'FeatureCollection',
+      features: [...this.rawFeatures],
+    };
+    const projection = geoConicConformal().parallels([31, 37]).rotate([-9.5, 0]).fitExtent(extent, collection);
+    const path = geoPath(projection);
+    const shapes: PuzzleShape[] = [];
+    for (const feature of this.rawFeatures) {
+      const city = CITY_BY_GEO.get(feature.properties.shapeName);
+      if (!city) continue;
+      const renderFeature = filterTinyHoles(feature, projection);
+      const d = path(renderFeature);
+      if (!d) continue;
+      const bounds = path.bounds(renderFeature);
+      const centroid = path.centroid(renderFeature);
+      shapes.push({
+        id: city.id,
+        city,
+        d,
+        centroid: [centroid[0], centroid[1]],
+        bounds: [
+          [bounds[0][0], bounds[0][1]],
+          [bounds[1][0], bounds[1][1]],
+        ],
+        area: path.area(renderFeature),
+      });
+    }
+    return shapes;
   }
 
   private applyProjection(): void {

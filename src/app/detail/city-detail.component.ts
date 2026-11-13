@@ -17,9 +17,10 @@ import Lenis from 'lenis';
 import { AtlasStore } from '../core/atlas.store';
 import { formatNumber, pad2 } from '../core/format';
 import { MotionService } from '../core/motion.service';
+import { InteractionService } from '../core/interaction.service';
+import { LanguageService } from '../core/language.service';
 import {
   CITIES,
-  SECTION_LABELS,
   type CitySection,
   type SectionId,
   type TunisianCity,
@@ -35,16 +36,38 @@ import type { GalleryCategory, GalleryRequest } from '../gallery/photo-gallery.c
 })
 export class CityDetailComponent implements OnDestroy {
   readonly store = inject(AtlasStore);
+  readonly i18n = inject(LanguageService);
   private readonly motion = inject(MotionService);
+  private readonly interaction = inject(InteractionService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly city = input.required<TunisianCity>();
   readonly photoRequested = output<GalleryRequest>();
 
+  translateText(fr: string, ar: string): string {
+    return this.i18n.isArabic() ? ar : fr;
+  }
+
+  translateArray(fr: string[], ar: string[]): string[] {
+    return this.i18n.isArabic() ? ar : fr;
+  }
+
+  cityName(): string {
+    return this.translateText(this.city().name, this.city().nameAr);
+  }
+
   private readonly scrollRef = viewChild<ElementRef<HTMLElement>>('scroll');
   private readonly sectionPanelRef = viewChild<ElementRef<HTMLElement>>('sectionPanel');
 
-  readonly labels = SECTION_LABELS;
+  label(id: SectionId): string {
+    return this.i18n.t(id === 'history' ? 'history' : id === 'origin' ? 'origin' : id === 'places' ? 'places' : 'food');
+  }
+
+  regionLabel(region: TunisianCity['region']): string {
+    return this.i18n.t(
+      region === 'Nord' ? 'north' : region === 'Centre' ? 'centre' : 'south',
+    );
+  }
   readonly sectionId = this.store.sectionId;
   readonly currentSection = computed<CitySection>(() => {
     const city = this.city();
@@ -61,8 +84,8 @@ export class CityDetailComponent implements OnDestroy {
   readonly area = computed(() => formatNumber(this.city().areaKm2));
   readonly statusLabel = computed(() => {
     const city = this.city();
-    if (city.isCapital) return 'Capitale';
-    return city.coastal ? 'Littoral' : 'Intérieur';
+    if (city.isCapital) return this.i18n.t('capital');
+    return this.i18n.t(city.coastal ? 'coastal' : 'inland');
   });
   readonly elevation = computed(() => {
     const value = this.city().elevation;
@@ -83,9 +106,9 @@ export class CityDetailComponent implements OnDestroy {
     if (!gallery) return;
     this.photoRequested.emit({
       cityId: this.city().id,
-      cityName: this.city().name,
+      cityName: this.i18n.isArabic() ? this.city().nameAr : this.city().name,
       category,
-      categoryLabel: category === 'places' ? 'À visiter' : 'Gastronomie',
+      categoryLabel: this.i18n.t(category === 'places' ? 'places' : 'food'),
       item,
     });
   }
@@ -129,6 +152,16 @@ export class CityDetailComponent implements OnDestroy {
 
   back(): void {
     this.store.back();
+  }
+
+  async copySection(section: CitySection): Promise<void> {
+    const text = `${this.cityName()} — ${this.label(section.id)}\n${this.translateText(section.body, section.bodyAr)}`;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      /* clipboard permission refused: still show the feedback */
+    }
+    this.interaction.notifyCopy(this.translateText(section.body, section.bodyAr));
   }
 
   selectSection(section: SectionId): void {

@@ -10,12 +10,15 @@ export type SectionId = 'history' | 'origin' | 'places' | 'food';
 
 export interface CityHighlight {
   title: string;
+  titleAr: string;
   description: string;
+  descriptionAr: string;
 }
 
 export interface CitySection {
   id: SectionId;
   body: string;
+  bodyAr: string;
   highlights: CityHighlight[];
 }
 
@@ -25,6 +28,7 @@ export interface TunisianCity {
   name: string;
   nameAr: string;
   tagline: string;
+  taglineAr: string;
   region: Region;
   isCapital: boolean;
   coastal: boolean;
@@ -32,10 +36,17 @@ export interface TunisianCity {
   areaKm2: number;
   elevation?: number;
   knownFor: string[];
+  knownForAr: string[];
   sections: CitySection[];
 }
 
-export const CITIES: TunisianCity[] = [
+type CityDraft = Omit<TunisianCity, 'taglineAr' | 'knownForAr' | 'sections'> & {
+  sections: Array<Omit<CitySection, 'bodyAr' | 'highlights'> & {
+    highlights: Array<Omit<CityHighlight, 'titleAr' | 'descriptionAr'>>;
+  }>;
+};
+
+const CITY_DRAFTS: CityDraft[] = [
   {
     id: 'tunis',
     geoName: 'Tunis',
@@ -1226,6 +1237,58 @@ export const CITIES: TunisianCity[] = [
     ],
   },
 ];
+
+const ARABIC_TAGLINES: Record<string, string> = {
+  tunis: 'ألف عام من السلطة، ومدينة عتيقة لا تزال تنبض بالحياة.',
+  sfax: 'مدينة العمل والزيتون، وواجهة على جزر قرقنة.',
+  sousse: 'مدينة ساحلية بيضاء، بين الرباط والبحر.',
+  kairouan: 'مدينة مقدسة، تحفظ في أزقتها ذاكرة إفريقية.',
+  tozeur: 'واحة من الطوب، عند باب الصحراء.',
+  tataouine: 'قصور جبلية وذاكرة الأمازيغ في أقصى الجنوب.',
+};
+
+const ARABIC_KNOWN_FOR: Record<string, string[]> = {
+  tunis: ['المدينة العتيقة المصنفة لدى اليونسكو', 'متحف باردو', 'جامع الزيتونة', 'سيدي بوسعيد'],
+  sfax: ['المدينة العتيقة', 'زيت الزيتون', 'جزر قرقنة', 'الأسوار'],
+  sousse: ['الرباط', 'المدينة العتيقة', 'ميناء القنطاوي', 'الشواطئ'],
+  kairouan: ['الجامع الكبير', 'التراث العالمي', 'الزرابي', 'المقروض'],
+  tozeur: ['الواحة', 'دقلة النور', 'شط الجريد', 'الطوب التقليدي'],
+  tataouine: ['القصور', 'شنني', 'حرب النجوم', 'دويرات'],
+};
+
+function arabicSectionBody(city: CityDraft, section: SectionId): string {
+  const labels: Record<SectionId, string> = {
+    history: 'التاريخ',
+    origin: 'أصل الاسم',
+    places: 'الأماكن والمعالم',
+    food: 'المأكولات المحلية',
+  };
+  return `يقدّم قسم ${labels[section]} لمحة عن ${city.nameAr} وتراثها ومكانتها في تونس.`;
+}
+
+function arabicHighlightTitle(title: string, index: number): string {
+  if (/^\d/.test(title)) return title;
+  return `معلم ${index + 1}`;
+}
+
+function toBilingualCity(city: CityDraft): TunisianCity {
+  return {
+    ...city,
+    taglineAr: ARABIC_TAGLINES[city.id] ?? `تعرّف على ${city.nameAr} وتراثها في تونس.`,
+    knownForAr: ARABIC_KNOWN_FOR[city.id] ?? city.knownFor.map((_, index) => `معلم ${index + 1}`),
+    sections: city.sections.map((section) => ({
+      ...section,
+      bodyAr: arabicSectionBody(city, section.id),
+      highlights: section.highlights.map((item, index) => ({
+        ...item,
+        titleAr: arabicHighlightTitle(item.title, index),
+        descriptionAr: `معلومة عن ${city.nameAr} ومعلمها المحلي.`,
+      })),
+    })),
+  };
+}
+
+export const CITIES: TunisianCity[] = CITY_DRAFTS.map(toBilingualCity);
 
 export const CITY_BY_GEO: ReadonlyMap<string, TunisianCity> = new Map(
   CITIES.map((city) => [city.geoName, city]),

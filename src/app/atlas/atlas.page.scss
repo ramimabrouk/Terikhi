@@ -130,12 +130,53 @@
   min-height: 0;
 }
 
-.workspace > app-hannibal {
-  position: absolute;
-  top: clamp(16px, 2.4vw, 32px);
-  left: clamp(16px, 2.4vw, 32px);
-  z-index: 4;
-  width: min(360px, calc(100% - 32px));
+.rail-guide {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-height: 160px;
+}
+
+.float-guide {
+  display: none;
+}
+
+.puzzle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-inline-end: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.puzzle-btn svg {
+  width: 17px;
+  height: 17px;
+  fill: var(--terracotta);
+  transition: transform 0.4s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.puzzle-btn:hover {
+  background: var(--ink);
+  color: var(--paper-soft);
+}
+
+.puzzle-btn:hover svg {
+  transform: rotate(90deg) scale(1.1);
+}
+
+.chrome-actions {
+  align-items: center;
+  gap: 4px;
 }
 
 .map-pane {
@@ -154,9 +195,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
   min-height: 0;
-  padding: clamp(20px, 2.6vw, 32px);
+  padding: clamp(16px, 2vw, 26px);
   border-right: 1px solid var(--line);
   background: var(--paper);
 }
@@ -527,6 +568,35 @@
     display: none;
   }
 
+  .rail-guide {
+    display: none;
+  }
+
+  .float-guide {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 4;
+    display: flex;
+    width: 92px;
+    height: 112px;
+  }
+
+  .atlas.has-selection .float-guide {
+    display: none;
+  }
+
+  .puzzle-label {
+    display: none;
+  }
+
+  .puzzle-btn {
+    width: 44px;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+  }
+
   .map-caption-mobile {
     position: absolute;
     top: 12px;
@@ -661,6 +731,24 @@
   }
 
   .colophon {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-mark {
+    display: none;
+  }
+
+  .brand-title {
+    font-size: 19px;
+  }
+
+  .chrome-actions {
+    gap: 0;
+  }
+
+  .chrome-actions app-narration-control ::ng-deep .more {
     display: none;
   }
 }

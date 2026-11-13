@@ -1,5 +1,5 @@
 <div class="atlas" [class.panel-open]="panelOpen()" [class.has-selection]="selected() !== null">
-  <header class="chrome" [attr.inert]="introOpen() ? '' : null">
+  <header class="chrome" [attr.inert]="introOpen() || puzzleOpen() ? '' : null">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 30 30">
@@ -13,46 +13,59 @@
       </span>
       <div class="brand-copy">
         <h1 class="brand-title">Atlas de <em>Tunisie</em></h1>
-        <p class="brand-sub">Atlas éditorial · Édition 2026</p>
+        <p class="brand-sub">{{ i18n.t('brand.subtitle') }}</p>
       </div>
     </div>
 
     <p class="chrome-coord" aria-hidden="true">{{ coordinate() }}</p>
 
     <div class="chrome-actions">
-      <button type="button" class="search-btn" (click)="openIndex()" aria-label="Rechercher un gouvernorat">
+      <button type="button" class="puzzle-btn" (click)="openPuzzle()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M10 3h4v2.2a1.8 1.8 0 1 0 3.6 0V3H21v7h-2.2a1.8 1.8 0 1 0 0 3.6H21V21h-7v-2.2a1.8 1.8 0 1 0-3.6 0V21H3v-7h2.2a1.8 1.8 0 1 0 0-3.6H3V3h7z"
+          />
+        </svg>
+        <span class="puzzle-label">{{ i18n.t('puzzle') }}</span>
+      </button>
+      <app-narration-control />
+      <button type="button" class="search-btn" (click)="openIndex()" [attr.aria-label]="i18n.t('search')">
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1" />
           <path d="M13 13l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1" />
         </svg>
-        <span class="search-label">Rechercher</span>
+        <span class="search-label">{{ i18n.t('search') }}</span>
         <kbd>/</kbd>
+      </button>
+      <button type="button" class="language-btn" (click)="i18n.toggle()">
+        {{ i18n.t('language') }}
       </button>
     </div>
   </header>
 
-  <main class="workspace" [attr.inert]="introOpen() ? '' : null">
-    <app-hannibal />
-    <section class="map-pane" aria-label="Carte de Tunisie">
+  <main class="workspace" [attr.inert]="introOpen() || puzzleOpen() ? '' : null">
+    <section class="map-pane" [attr.aria-label]="i18n.t('governorates')">
       <div class="map-rail">
         @if (selected(); as city) {
           <p class="map-focus">
-            <span class="eyebrow">Zoom sur</span>
+            <span class="eyebrow">{{ i18n.t('zoom') }}</span>
             <span class="map-focus-name">{{ city.name }}</span>
             <span class="map-focus-region">· {{ city.region }}</span>
           </p>
         } @else {
           <div class="map-caption">
-            <p class="eyebrow">Planche I · Carte générale</p>
-            <p class="map-count"><span>24</span><em>gouvernorats</em></p>
-            <p class="map-note">Cliquez un gouvernorat pour ouvrir sa fiche.</p>
+            <p class="eyebrow">Planche I · {{ i18n.t('governorates') }}</p>
+            <p class="map-count"><span>24</span><em>{{ i18n.t('governorates') }}</em></p>
+            <p class="map-note">{{ i18n.t('clickToOpen') }}</p>
           </div>
         }
+
+        <app-elissa class="rail-guide" />
 
         <div class="rail-bottom">
           @if (!selected()) {
             <div class="legend" role="group" aria-label="Mettre en avant une région">
-              <span class="legend-label eyebrow">Régions</span>
+              <span class="legend-label eyebrow">{{ i18n.t('regions') }}</span>
               <button
                 type="button"
                 class="chip"
@@ -60,7 +73,7 @@
                 [attr.aria-pressed]="regionFilter() === null"
                 (click)="clearRegion()"
               >
-                Toutes <span class="chip-caret" aria-hidden="true">›</span>
+                {{ i18n.t('all') }} <span class="chip-caret" aria-hidden="true">›</span>
               </button>
               @for (item of regions; track item.region) {
                 <button
@@ -76,7 +89,7 @@
                     [class.chip-dot--centre]="item.region === 'Centre'"
                     [class.chip-dot--sud]="item.region === 'Sud'"
                   ></span>
-                  {{ item.region }} <span class="chip-count">{{ item.count }}</span>
+                  {{ regionLabel(item.region) }} <span class="chip-count">{{ item.count }}</span>
                 </button>
               }
             </div>
@@ -95,13 +108,15 @@
           (citySelected)="onCitySelected($event)"
           (cleared)="onMapCleared()"
         />
+        <app-region-emblem [city]="selected()" />
+        <app-elissa class="float-guide" />
         <app-photo-gallery
           [request]="activeGalleryRequest()"
           (closed)="closeGallery()"
         />
 
         @if (!selected()) {
-          <p class="map-caption-mobile eyebrow">Planche I · Carte générale</p>
+          <p class="map-caption-mobile eyebrow">Planche I · {{ i18n.t('governorates') }}</p>
         }
 
         <div class="compass-rose" aria-hidden="true">
@@ -119,7 +134,7 @@
     <aside
       class="reader"
       [class.is-open]="panelOpen()"
-      [attr.aria-label]="selected() ? 'Fiche du gouvernorat' : 'Index des gouvernorats'"
+      [attr.aria-label]="selected() ? i18n.t('sheet') : i18n.t('governorateIndex')"
     >
       @if (!selected()) {
         <button
@@ -130,8 +145,8 @@
         >
           <span class="grab-mark" aria-hidden="true"></span>
           <span class="grab-copy">
-            <span class="eyebrow">{{ sheetOpen() ? 'Refermer' : 'Parcourir' }}</span>
-            <span class="grab-title">Index des gouvernorats</span>
+            <span class="eyebrow">{{ sheetOpen() ? '×' : i18n.t('browse') }}</span>
+            <span class="grab-title">{{ i18n.t('governorateIndex') }}</span>
           </span>
           <svg class="grab-chevron" [class.is-up]="sheetOpen()" viewBox="0 0 18 18" aria-hidden="true">
             <path d="M4 11l5-5 5 5" fill="none" stroke="currentColor" stroke-width="1" />
@@ -150,12 +165,19 @@
   </main>
 
   <footer class="colophon" [attr.inert]="introOpen() ? '' : null">
-    <span>Atlas de Tunisie — Édition 2026</span>
+    <span>Atlas de Tunisie — 2026</span>
     <span class="colophon-center">Une lecture du pays, planche par planche · Fonds geoBoundaries ADM1</span>
     <span>Planches I–XXIV</span>
   </footer>
 
   <p class="sr-only" aria-live="polite">{{ store.liveMessage() }}</p>
+
+  @if (puzzleOpen()) {
+    <app-map-puzzle (closed)="closePuzzle()" />
+  }
+
+  <app-fx-layer />
+  <app-eagle-cursor />
 
   @if (introOpen()) {
     <app-atlas-intro (exitStarted)="onIntroExit()" (closed)="onIntroClosed()" />
