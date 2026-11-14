@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
  */
 @Injectable()
 export class JsonStoreService {
-  private readonly dataDir = process.env.DATA_DIR ?? join(process.cwd(), 'data');
+  private readonly dataDir = process.env.DATA_DIR ?? join(__dirname, '../../data');
   private readonly queues = new Map<string, Promise<unknown>>();
 
   async read<T>(name: string, fallback: T): Promise<T> {
