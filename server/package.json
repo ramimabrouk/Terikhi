@@ -2,7 +2,7 @@
   "name": "tunisia-explorer-api",
   "version": "1.0.0",
   "private": true,
-  "description": "NestJS backend for the Atlas de Tunisie: puzzle leaderboard and governorate view statistics.",
+  "description": "NestJS backend for Terikhi: puzzle leaderboard, governorate statistics, and contact messages.",
   "scripts": {
     "build": "nest build",
     "start": "nest start",

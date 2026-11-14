@@ -12,12 +12,19 @@
         </svg>
       </span>
       <div class="brand-copy">
-        <h1 class="brand-title">Atlas de <em>Tunisie</em></h1>
+        <h1 class="brand-title">Terikhi <em>· Tunisie</em></h1>
         <p class="brand-sub">{{ i18n.t('brand.subtitle') }}</p>
       </div>
     </div>
 
     <p class="chrome-coord" aria-hidden="true">{{ coordinate() }}</p>
+
+    <nav class="primary-nav" aria-label="Navigation principale">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Accueil</a>
+      <a routerLink="/recherche" routerLinkActive="active">Recherche</a>
+      <a routerLink="/a-propos" routerLinkActive="active">À propos</a>
+      <a routerLink="/contact" routerLinkActive="active">Contact</a>
+    </nav>
 
     <div class="chrome-actions">
       <button type="button" class="puzzle-btn" (click)="openPuzzle()">
@@ -165,7 +172,7 @@
   </main>
 
   <footer class="colophon" [attr.inert]="introOpen() ? '' : null">
-    <span>Atlas de Tunisie — 2026</span>
+    <span>Terikhi — 2026</span>
     <span class="colophon-center">Une lecture du pays, planche par planche · Fonds geoBoundaries ADM1</span>
     <span>Planches I–XXIV</span>
   </footer>

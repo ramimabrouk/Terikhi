@@ -17,6 +17,12 @@ export interface PopularCity {
   views: number;
 }
 
+export interface ContactPayload {
+  name: string;
+  email: string;
+  message: string;
+}
+
 const LOCAL_SCORES = 'tunisia-explorer:scores';
 const LOCAL_VIEWS = 'tunisia-explorer:views';
 const API = '/api';
@@ -89,6 +95,11 @@ export class ApiService {
         .sort((a, b) => b.views - a.views)
         .slice(0, limit);
     }
+
+  }
+
+  async sendContact(payload: ContactPayload): Promise<void> {
+    await firstValueFrom(this.http.post<void>(`${API}/contact`, payload).pipe(timeout(5000)));
   }
 
   private localScores(): PuzzleScore[] {

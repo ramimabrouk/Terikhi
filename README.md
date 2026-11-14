@@ -1,21 +1,35 @@
-# Atlas de Tunisie — Tunisia Explorer
+# Terikhi — Tunisia Explorer
 
-Interactive atlas of Tunisia's 24 governorates, built with **Angular 20** for the frontend and **NestJS 11** for the backend.
+Terikhi est un atlas interactif des 24 gouvernorats de Tunisie, construit avec **Angular 20** pour le frontend et **NestJS 11** pour le backend.
 
 ## Run it
 
 ```bash
-# 1. Frontend (http://localhost:4200)
+# Frontend (http://localhost:4200)
 npm install
-npm start            # ng serve, proxies /api to http://localhost:3000
+npm start
 
-# 2. Backend (http://localhost:3000/api), in a second terminal
+# Backend (http://localhost:3000/api), dans un second terminal
+npm install
+npm run start:dev
+
+# Alternative depuis le dossier server
 cd server
 npm install
 npm run start:dev
 ```
 
-The atlas works without the backend too. The puzzle scores and "most explored" chips then fall back to the browser's localStorage, and the leaderboard is marked "hors ligne · scores locaux".
+Le frontend propose la carte, les fiches partageables (`/gouvernorat/:id`), la recherche, un puzzle, ainsi que les pages À propos et Contact. La carte et les fiches restent consultables lorsque l’API est indisponible ; l’envoi du formulaire Contact, lui, affiche une erreur claire si le backend n’est pas lancé.
+
+## Routes frontend
+
+| Route | Fonction |
+| --- | --- |
+| `/` | Accueil et carte interactive |
+| `/gouvernorat/:id` | Fiche partageable et carte centrée sur un gouvernorat |
+| `/recherche` | Recherche dans les 24 fiches |
+| `/a-propos` | Projet, équipe, méthode et crédits |
+| `/contact` | Formulaire de contact |
 
 > The photos and the GeoJSON live in `public/` (`public/gouvernorats/**`, `public/data/tunisia-governorates.geojson`). They must be present for the map and the photos to load.
 
@@ -46,5 +60,6 @@ Data is stored as JSON files in `server/data/`, so there is no database to insta
 | POST | `/api/scores` `{ name, mode, timeMs, moves }` | save a score (validated; impossible times are rejected) |
 | POST | `/api/stats/views/:cityId` | count a governorate view |
 | GET | `/api/stats/views?limit=3` | most explored governorates |
+| POST | `/api/contact` | receive `{ name, email, message }` with strict validation and IP rate limiting |
 
-Ideas for later: Arabic/French quiz questions served by the API, a guestbook per governorate, or a server-side text-to-speech proxy (e.g. Azure Neural voices) for identical voices on every device.
+Les messages de contact sont stockés dans `server/data/contact.json` (fichier local exclu de Git). L’API n’ajoute aucune dépendance : elle utilise les contrôleurs NestJS et le stockage JSON déjà présents.

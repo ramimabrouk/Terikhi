@@ -9,6 +9,8 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AtlasStore } from '../core/atlas.store';
 import { GeometryService } from '../core/geometry.service';
 import { LanguageService } from '../core/language.service';
@@ -26,7 +28,7 @@ import { NarrationDirectorService } from '../core/narration-director.service';
 import { ApiService } from '../core/api.service';
 import { PhotoGalleryComponent } from '../gallery/photo-gallery.component';
 import type { GalleryRequest } from '../gallery/photo-gallery.component';
-import { CITIES, REGIONS, type Region } from '../data/cities.data';
+import { CITIES, CITY_BY_ID, REGIONS, type Region } from '../data/cities.data';
 
 const INTRO_KEY = 'tunisia-explorer:intro';
 
@@ -54,6 +56,8 @@ function formatDms(value: number, positive: string, negative: string): string {
     RegionEmblemComponent,
     MapPuzzleComponent,
     PhotoGalleryComponent,
+    RouterLink,
+    RouterLinkActive,
   ],
   templateUrl: './atlas.page.html',
   styleUrl: './atlas.page.scss',
@@ -65,6 +69,8 @@ export class AtlasPage {
   readonly i18n = inject(LanguageService);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly api = inject(ApiService);
   readonly introOpen = signal(false);
@@ -105,6 +111,8 @@ export class AtlasPage {
     this.introOpen.set(!seen);
     this.mapReveal.set(seen);
     void this.geometry.load();
+    const routeId = this.route.snapshot.paramMap.get('id');
+    if (routeId && CITY_BY_ID.has(routeId)) this.store.select(routeId);
     inject(NarrationDirectorService).start(this.destroyRef);
     this.document.addEventListener('keydown', this.onKeydown);
     this.destroyRef.onDestroy(() => this.document.removeEventListener('keydown', this.onKeydown));
@@ -144,6 +152,7 @@ export class AtlasPage {
   onCitySelected(id: string): void {
     this.galleryRequest.set(null);
     this.store.select(id);
+    void this.router.navigate(['/gouvernorat', id]);
   }
 
   openPuzzle(): void {
@@ -157,6 +166,7 @@ export class AtlasPage {
   onMapCleared(): void {
     this.galleryRequest.set(null);
     this.store.back();
+    void this.router.navigateByUrl('/');
   }
 
   closeGallery(): void {
@@ -191,7 +201,7 @@ export class AtlasPage {
     if (event.key === 'Escape') {
       if (this.selected()) {
         event.preventDefault();
-        this.store.back();
+        this.onMapCleared();
         return;
       }
       if (this.sheetOpen()) {

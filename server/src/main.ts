@@ -9,7 +9,7 @@ async function bootstrap(): Promise<void> {
   app.enableCors({ origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127\.0\.0\.1:\d+$/] });
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
-  console.log(`Atlas API ready on http://localhost:${port}/api`);
+  console.log(`Terikhi API ready on http://localhost:${port}/api`);
 }
 
 void bootstrap();
